@@ -48,19 +48,6 @@
     .card h1 { font-size: clamp(1.75rem, 8vw, 2.25rem); color: #1e1b4b; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; }
     .card p { color: #6b7280; font-size: 1rem; line-height: 1.6; margin-bottom: 32px; }
 
-    /* Tic Tac Toe */
-    .ttt { background: #fff; border-radius: 24px; padding: 28px 24px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-width: 360px; width: 100%; }
-    .ttt h2 { color: #1e1b4b; font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; }
-    .ttt-status { color: #6b7280; font-size: 0.95rem; margin-bottom: 20px; min-height: 1.4em; }
-    .ttt-status.win { color: #4f46e5; font-weight: 700; }
-    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
-    .cell { aspect-ratio: 1; background: #f3f4f6; border-radius: 12px; border: none; font-size: clamp(2rem, 10vw, 2.8rem); font-weight: 800; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background 0.15s, transform 0.1s; color: #1e1b4b; display: flex; align-items: center; justify-content: center; }
-    .cell:active { transform: scale(0.93); }
-    .cell.x { color: #4f46e5; background: #ede9fe; }
-    .cell.o { color: #7c3aed; background: #f5f3ff; }
-    .cell.win-cell { background: #4f46e5; color: #fff; }
-    .cell:disabled { cursor: default; }
-    .ttt .btn { width: 100%; }
 
     /* Shared card game styles */
     .game-box { background: #fff; border-radius: 24px; padding: 16px 16px 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-width: 390px; width: 100%; }
@@ -109,7 +96,6 @@
 
   <nav class="tabs">
     <button class="tab-btn active" onclick="showTab('hello', this)">&#x1F44B; Hello</button>
-    <button class="tab-btn" onclick="showTab('ttt', this)">&#x1F3AE; TTT</button>
     <button class="tab-btn" onclick="showTab('bj', this)">&#x1F0CF; BJ</button>
     <button class="tab-btn" onclick="showTab('tcp', this)">&#x2660; 3-Card</button>
   </nav>
@@ -124,25 +110,6 @@
     </div>
   </div>
 
-  <!-- Tic Tac Toe -->
-  <div id="panel-ttt" class="panel" style="display:none">
-    <div class="ttt">
-      <h2>Tic Tac Toe</h2>
-      <div class="ttt-status" id="ttt-status">X goes first</div>
-      <div class="board">
-        <button class="cell" onclick="move(0)"></button>
-        <button class="cell" onclick="move(1)"></button>
-        <button class="cell" onclick="move(2)"></button>
-        <button class="cell" onclick="move(3)"></button>
-        <button class="cell" onclick="move(4)"></button>
-        <button class="cell" onclick="move(5)"></button>
-        <button class="cell" onclick="move(6)"></button>
-        <button class="cell" onclick="move(7)"></button>
-        <button class="cell" onclick="move(8)"></button>
-      </div>
-      <button class="btn" onclick="resetGame()">New Game</button>
-    </div>
-  </div>
 
   <!-- Blackjack -->
   <div id="panel-bj" class="panel" style="display:none">
@@ -292,33 +259,6 @@
       }, 175);
     }
 
-    /* Tic Tac Toe */
-    const TTT_WINS=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    let tttBoard, tttCurrent, tttOver;
-    function resetGame() {
-      tttBoard=Array(9).fill(''); tttCurrent='X'; tttOver=false;
-      document.querySelectorAll('.cell').forEach(function(c){c.textContent='';c.className='cell';c.disabled=false;});
-      var s=document.getElementById('ttt-status'); s.className='ttt-status'; s.textContent='X goes first';
-    }
-    function move(i) {
-      if (tttOver||tttBoard[i]) return;
-      tttBoard[i]=tttCurrent;
-      var cell=document.querySelectorAll('.cell')[i];
-      cell.textContent=tttCurrent; cell.classList.add(tttCurrent.toLowerCase()); cell.disabled=true;
-      var win=TTT_WINS.find(function(w){return tttBoard[w[0]]&&tttBoard[w[0]]===tttBoard[w[1]]&&tttBoard[w[0]]===tttBoard[w[2]];});
-      if (win) {
-        tttOver=true;
-        win.forEach(function(idx){document.querySelectorAll('.cell')[idx].classList.add('win-cell');});
-        var s=document.getElementById('ttt-status'); s.textContent=tttCurrent+' wins! 🎉'; s.className='ttt-status win';
-        document.querySelectorAll('.cell').forEach(function(c){c.disabled=true;});
-      } else if (tttBoard.every(Boolean)) {
-        tttOver=true; document.getElementById('ttt-status').textContent="It's a draw!";
-      } else {
-        tttCurrent=tttCurrent==='X'?'O':'X';
-        document.getElementById('ttt-status').textContent=tttCurrent+"'s turn";
-      }
-    }
-    resetGame();
 
     /* ===== Blackjack ===== */
     var bjDeck, bjPlayerHand, bjSplitHand, bjDealerHand;
@@ -607,6 +547,7 @@
         tcpFinishResolve(played);
       }, 3*370+220);
     }
+
     function tcpFinishResolve(played) {
       var pe=tcpEval(tcpPlayerHand), de=tcpEval(tcpDealerHand);
       var net=0, lines=[];
