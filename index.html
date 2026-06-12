@@ -90,6 +90,20 @@
     .payout-table { font-size: 0.7rem; color: #6b7280; margin-bottom: 10px; text-align: left; background: #f9fafb; border-radius: 10px; padding: 8px 10px; }
     .payout-table td { padding: 1px 6px; }
     .payout-table td:first-child { font-weight: 600; color: #374151; }
+
+    /* History */
+    .history-box { background: #fff; border-radius: 24px; padding: 16px 16px 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-width: 390px; width: 100%; }
+    .history-box h2 { color: #1e1b4b; font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; text-align: center; }
+    .history-list { list-style: none; max-height: 60vh; overflow-y: auto; }
+    .history-list li { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.82rem; }
+    .history-list li:last-child { border-bottom: none; }
+    .h-game { font-weight: 700; color: #6b7280; min-width: 28px; font-size: 0.7rem; text-transform: uppercase; }
+    .h-detail { flex: 1; color: #374151; }
+    .h-net { font-weight: 800; min-width: 48px; text-align: right; }
+    .h-net.win  { color: #16a34a; }
+    .h-net.lose { color: #dc2626; }
+    .h-net.push { color: #d97706; }
+    .history-empty { text-align: center; color: #9ca3af; font-size: 0.9rem; padding: 24px 0; }
   </style>
 </head>
 <body>
@@ -98,6 +112,7 @@
     <button class="tab-btn active" onclick="showTab('hello', this)">&#x1F44B; Hello</button>
     <button class="tab-btn" onclick="showTab('bj', this)">&#x1F0CF; BJ</button>
     <button class="tab-btn" onclick="showTab('tcp', this)">&#x2660; 3-Card</button>
+    <button class="tab-btn" onclick="showTab('history', this)">&#x1F4CA; History</button>
   </nav>
 
   <!-- Hello -->
@@ -216,6 +231,16 @@
     </div>
   </div>
 
+  <!-- History -->
+  <div id="panel-history" class="panel" style="display:none">
+    <div class="history-box">
+      <h2>&#x1F4CA; History</h2>
+      <ul class="history-list" id="history-list">
+        <li class="history-empty">No results yet.</li>
+      </ul>
+    </div>
+  </div>
+
   <script>
     /* Tab switching */
     function showTab(name, btn) {
@@ -223,6 +248,31 @@
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       const panel = document.getElementById('panel-' + name);
       panel.classList.add('active'); panel.style.display='flex'; btn.classList.add('active');
+      if (name === 'history') loadHistory();
+    }
+
+    /* Results API */
+    function saveResult(game, result, net, detail) {
+      fetch('/api/results', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({game, result, net, detail})
+      }).catch(function(){});
+    }
+
+    function loadHistory() {
+      fetch('/api/results').then(function(r){ return r.ok ? r.json() : null; }).then(function(rows) {
+        var list = document.getElementById('history-list');
+        if (!rows || rows.length === 0) { list.innerHTML = '<li class="history-empty">No results yet.</li>'; return; }
+        list.innerHTML = rows.map(function(r) {
+          var label = r.game === 'blackjack' ? 'BJ' : '3C';
+          var netCls = r.net > 0 ? 'win' : r.net < 0 ? 'lose' : 'push';
+          var netStr = r.net > 0 ? '+$' + r.net : r.net < 0 ? '-$' + Math.abs(r.net) : 'push';
+          return '<li><span class="h-game">'+label+'</span><span class="h-detail">'+r.detail+'</span><span class="h-net '+netCls+'">'+netStr+'</span></li>';
+        }).join('');
+      }).catch(function(){
+        document.getElementById('history-list').innerHTML = '<li class="history-empty">Not available.</li>';
+      });
     }
 
     /* Shared */
@@ -438,6 +488,7 @@
       }
       if(bjChips<=0){bjChips=500;msg+=' | Reset $500.';}
       bjStatus(msg, totalNet>0?'win':totalNet<0?'lose':'push');
+      saveResult('blackjack', totalNet>0?'win':totalNet<0?'lose':'push', totalNet, msg);
       document.getElementById('bj-action-section').style.display='none';
       document.getElementById('bj-new-btn').style.display='block';
       bjUpdateDisplay();
@@ -573,6 +624,7 @@
       tcpChips+=net;
       if(tcpChips<=0){tcpChips=500;lines.push('Reset $500.');}
       tcpStatus(lines.join(' | '), net>0?'win':net<0?'lose':'push');
+      saveResult('three_card_poker', net>0?'win':net<0?'lose':'push', net, lines.join(' | '));
       document.getElementById('tcp-new-btn').style.display='block';
       tcpUpdateDisplay();
     }
