@@ -213,10 +213,10 @@
       <!-- Betting chips -->
       <div id="bj-bet-section">
         <div class="bj-bet-row">
-          <button class="chip-btn chip-5"   onclick="bjBet(5)">$5</button>
-          <button class="chip-btn chip-10"  onclick="bjBet(10)">$10</button>
-          <button class="chip-btn chip-25"  onclick="bjBet(25)">$25</button>
-          <button class="chip-btn chip-100" onclick="bjBet(100)">$100</button>
+          <button class="chip-btn chip-5"   onclick="bjAddBet(5)">$5</button>
+          <button class="chip-btn chip-10"  onclick="bjAddBet(10)">$10</button>
+          <button class="chip-btn chip-25"  onclick="bjAddBet(25)">$25</button>
+          <button class="chip-btn chip-100" onclick="bjAddBet(100)">$100</button>
         </div>
         <div class="bj-actions">
           <button class="btn" id="bj-deal-btn" onclick="bjDeal()" disabled>Deal</button>
@@ -338,7 +338,7 @@
       document.getElementById('bj-deal-btn').disabled = bjBet === 0;
     }
 
-    function bjBet(amount) {
+    function bjAddBet(amount) {
       if (bjPhase !== 'betting') return;
       if (bjBet + amount > bjChips) return;
       bjBet += amount;
