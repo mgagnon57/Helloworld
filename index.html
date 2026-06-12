@@ -74,7 +74,11 @@
     .hand-label { font-size: 0.7rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
     .hand-name  { font-size: 0.8rem; font-weight: 700; color: #4f46e5; min-height: 1.1em; margin-top: 4px; }
     .hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; min-height: 68px; }
-    .playing-card { width: 44px; height: 64px; border-radius: 7px; border: 1.5px solid #e5e7eb; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    @keyframes cardDeal {
+      from { transform: translateY(-30px) scale(0.7) rotate(-5deg); opacity: 0; }
+      to   { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+    }
+    .playing-card { width: 44px; height: 64px; border-radius: 7px; border: 1.5px solid #e5e7eb; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,0.1); animation: cardDeal 0.22s ease-out; }
     .playing-card .rank { font-size: 0.82rem; }
     .playing-card .suit { font-size: 1rem; }
     .playing-card.red { color: #dc2626; }
@@ -102,19 +106,19 @@
 <body>
 
   <nav class="tabs">
-    <button class="tab-btn active" onclick="showTab('hello', this)">👋 Hello</button>
-    <button class="tab-btn" onclick="showTab('ttt', this)">🎮 TTT</button>
-    <button class="tab-btn" onclick="showTab('bj', this)">🃏 BJ</button>
-    <button class="tab-btn" onclick="showTab('tcp', this)">♠ 3-Card</button>
+    <button class="tab-btn active" onclick="showTab('hello', this)">&#x1F44B; Hello</button>
+    <button class="tab-btn" onclick="showTab('ttt', this)">&#x1F3AE; TTT</button>
+    <button class="tab-btn" onclick="showTab('bj', this)">&#x1F0CF; BJ</button>
+    <button class="tab-btn" onclick="showTab('tcp', this)">&#x2660; 3-Card</button>
   </nav>
 
   <!-- Hello -->
   <div id="panel-hello" class="panel active" style="display:flex">
     <div class="card">
-      <div class="avatar">👋</div>
+      <div class="avatar">&#x1F44B;</div>
       <h1>Hello, Mike!</h1>
       <p>Welcome to your mobile-friendly web app, running on iOS and Samsung devices.</p>
-      <button class="btn" onclick="this.textContent='👍 Hey!'">Say Hey</button>
+      <button class="btn" onclick="this.textContent='&#x1F44D; Hey!'">Say Hey</button>
     </div>
   </div>
 
@@ -142,7 +146,7 @@
   <div id="panel-bj" class="panel" style="display:none">
     <div class="game-box">
       <h2>Blackjack</h2>
-      <div class="chip-info">💰 Chips: <span id="bj-chips">500</span> &nbsp;|&nbsp; Bet: <span id="bj-bet-display">0</span></div>
+      <div class="chip-info">&#x1F4B0; Chips: <span id="bj-chips">500</span> &nbsp;|&nbsp; Bet: <span id="bj-bet-display">0</span></div>
       <div class="hand-area">
         <div class="hand-label">Dealer</div>
         <div class="hand" id="dealer-hand"></div>
@@ -188,7 +192,7 @@
   <div id="panel-tcp" class="panel" style="display:none">
     <div class="game-box">
       <h2>Three Card Poker</h2>
-      <div class="chip-info">💰 <span id="tcp-chips">500</span> &nbsp;|&nbsp; Ante: <span id="tcp-ante-disp">0</span> &nbsp;|&nbsp; P+: <span id="tcp-pp-disp">0</span></div>
+      <div class="chip-info">&#x1F4B0; <span id="tcp-chips">500</span> &nbsp;|&nbsp; Ante: <span id="tcp-ante-disp">0</span> &nbsp;|&nbsp; P+: <span id="tcp-pp-disp">0</span></div>
 
       <div class="hand-area">
         <div class="hand-label">Dealer</div>
@@ -204,7 +208,6 @@
 
       <div class="game-status" id="tcp-status">Place your Ante to start!</div>
 
-      <!-- Betting -->
       <div id="tcp-bet-section">
         <div class="bet-label">Ante</div>
         <div class="bet-row">
@@ -233,7 +236,6 @@
         </table>
       </div>
 
-      <!-- Play / Fold -->
       <div id="tcp-action-section" style="display:none">
         <div class="action-row">
           <button class="btn" id="tcp-play-btn" onclick="tcpPlay()">Play</button>
@@ -248,35 +250,44 @@
   <script>
     /* Tab switching */
     function showTab(name, btn) {
-      document.querySelectorAll('.panel').forEach(p => {
-        p.classList.remove('active');
-        p.style.display = 'none';
-      });
+      document.querySelectorAll('.panel').forEach(p => { p.classList.remove('active'); p.style.display='none'; });
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       const panel = document.getElementById('panel-' + name);
-      panel.classList.add('active');
-      panel.style.display = 'flex';
-      btn.classList.add('active');
+      panel.classList.add('active'); panel.style.display='flex'; btn.classList.add('active');
     }
 
     /* Shared */
-    const SUITS = ['♠','♥','♦','♣'];
-    const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const SUITS=['♠','♥','♦','♣'];
+    const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 
     function buildShuffledDeck() {
-      const d = [];
-      for (const s of SUITS) for (const r of RANKS) d.push({r, s});
-      for (let i = d.length-1; i > 0; i--) { const j = Math.random()*(i+1)|0; [d[i],d[j]]=[d[j],d[i]]; }
+      const d=[];
+      for (const s of SUITS) for (const r of RANKS) d.push({r,s});
+      for (let i=d.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[d[i],d[j]]=[d[j],d[i]];}
       return d;
     }
 
     function makeCardEl(c, faceDown=false) {
-      const el = document.createElement('div');
-      if (faceDown) { el.className='playing-card face-down'; el.textContent='🂠'; return el; }
-      const red = c.s==='♥'||c.s==='♦';
+      const el=document.createElement('div');
+      if (faceDown){el.className='playing-card face-down';el.textContent='🂠';return el;}
+      const red=c.s==='♥'||c.s==='♦';
       el.className='playing-card '+(red?'red':'black');
-      el.innerHTML=`<span class="rank">${c.r}</span><span class="suit">${c.s}</span>`;
+      el.innerHTML='<span class="rank">'+c.r+'</span><span class="suit">'+c.s+'</span>';
       return el;
+    }
+
+    /* Flip a face-down card element to face-up using scaleX transition */
+    function flipCardEl(el, card) {
+      el.style.transition='transform 0.17s ease-in';
+      el.style.transform='scaleX(0)';
+      setTimeout(function(){
+        const red=card.s==='♥'||card.s==='♦';
+        el.className='playing-card '+(red?'red':'black');
+        el.innerHTML='<span class="rank">'+card.r+'</span><span class="suit">'+card.s+'</span>';
+        el.removeAttribute('data-hole');
+        el.style.transition='transform 0.17s ease-out';
+        el.style.transform='scaleX(1)';
+      }, 175);
     }
 
     /* Tic Tac Toe */
@@ -284,20 +295,20 @@
     let tttBoard, tttCurrent, tttOver;
     function resetGame() {
       tttBoard=Array(9).fill(''); tttCurrent='X'; tttOver=false;
-      document.querySelectorAll('.cell').forEach(c=>{c.textContent='';c.className='cell';c.disabled=false;});
-      const s=document.getElementById('ttt-status'); s.className='ttt-status'; s.textContent='X goes first';
+      document.querySelectorAll('.cell').forEach(function(c){c.textContent='';c.className='cell';c.disabled=false;});
+      var s=document.getElementById('ttt-status'); s.className='ttt-status'; s.textContent='X goes first';
     }
     function move(i) {
       if (tttOver||tttBoard[i]) return;
       tttBoard[i]=tttCurrent;
-      const cell=document.querySelectorAll('.cell')[i];
+      var cell=document.querySelectorAll('.cell')[i];
       cell.textContent=tttCurrent; cell.classList.add(tttCurrent.toLowerCase()); cell.disabled=true;
-      const win=TTT_WINS.find(([a,b,c])=>tttBoard[a]&&tttBoard[a]===tttBoard[b]&&tttBoard[a]===tttBoard[c]);
+      var win=TTT_WINS.find(function(w){return tttBoard[w[0]]&&tttBoard[w[0]]===tttBoard[w[1]]&&tttBoard[w[0]]===tttBoard[w[2]];});
       if (win) {
         tttOver=true;
-        win.forEach(idx=>document.querySelectorAll('.cell')[idx].classList.add('win-cell'));
-        const s=document.getElementById('ttt-status'); s.textContent=tttCurrent+' wins! 🎉'; s.className='ttt-status win';
-        document.querySelectorAll('.cell').forEach(c=>c.disabled=true);
+        win.forEach(function(idx){document.querySelectorAll('.cell')[idx].classList.add('win-cell');});
+        var s=document.getElementById('ttt-status'); s.textContent=tttCurrent+' wins! 🎉'; s.className='ttt-status win';
+        document.querySelectorAll('.cell').forEach(function(c){c.disabled=true;});
       } else if (tttBoard.every(Boolean)) {
         tttOver=true; document.getElementById('ttt-status').textContent="It's a draw!";
       } else {
@@ -307,58 +318,53 @@
     }
     resetGame();
 
-    /* Blackjack */
-    let bjDeck, bjPlayerHand, bjSplitHand, bjDealerHand;
-    let bjChips, bjBet, bjSplitBet, bjPhase, bjIsSplit, bjCurrentHand;
+    /* ===== Blackjack ===== */
+    var bjDeck, bjPlayerHand, bjSplitHand, bjDealerHand;
+    var bjChips, bjBet, bjSplitBet, bjPhase, bjIsSplit, bjCurrentHand;
 
     function bjCardVal(hand) {
-      let t=0,a=0;
-      for (const {r} of hand) {
-        if (r==='A'){t+=11;a++;}
-        else if (['J','Q','K'].includes(r)) t+=10;
-        else t+=+r;
+      var t=0,a=0;
+      for (var i=0;i<hand.length;i++){
+        var r=hand[i].r;
+        if(r==='A'){t+=11;a++;}
+        else if(r==='J'||r==='Q'||r==='K') t+=10;
+        else t+=parseInt(r,10);
       }
       while(t>21&&a--) t-=10;
       return t;
     }
     function bjActiveHand(){ return bjCurrentHand===0?bjPlayerHand:bjSplitHand; }
     function bjActiveBet()  { return bjCurrentHand===0?bjBet:bjSplitBet; }
-    function bjSetActiveBet(v){ if(bjCurrentHand===0) bjBet=v; else bjSplitBet=v; }
+    function bjSetActiveBet(v){ if(bjCurrentHand===0)bjBet=v; else bjSplitBet=v; }
     function bjChipsAvail() { return bjChips-bjBet-(bjIsSplit?bjSplitBet:0); }
-    function bjRankVal(r)   { if(['J','Q','K'].includes(r))return 10; if(r==='A')return 11; return +r; }
+    function bjRankVal(r)   { if(r==='J'||r==='Q'||r==='K')return 10; if(r==='A')return 11; return parseInt(r,10); }
 
-    function bjRender(hideDealer=false) {
-      const ph=document.getElementById('player-hand'), dh=document.getElementById('dealer-hand'), sh=document.getElementById('split-hand');
-      ph.innerHTML=''; dh.innerHTML=''; if(sh) sh.innerHTML='';
-      bjPlayerHand.forEach(c=>ph.appendChild(makeCardEl(c)));
-      bjDealerHand.forEach((c,i)=>dh.appendChild(makeCardEl(c,hideDealer&&i===1)));
-      document.getElementById('bj-player-score').textContent=bjCardVal(bjPlayerHand);
-      document.getElementById('bj-dealer-score').textContent=hideDealer?bjCardVal([bjDealerHand[0]]):bjCardVal(bjDealerHand);
-      if(bjIsSplit) {
-        if(sh) bjSplitHand.forEach(c=>sh.appendChild(makeCardEl(c)));
-        const sc=document.getElementById('bj-split-score');
-        if(sc) sc.textContent=bjSplitHand.length?bjCardVal(bjSplitHand):'';
-        const h1=document.getElementById('bj-hand1-area'), h2=document.getElementById('bj-hand2-area');
-        if(h1) h1.style.outline=bjCurrentHand===0?'2px solid #4f46e5':'none';
-        if(h2) h2.style.outline=bjCurrentHand===1?'2px solid #4f46e5':'none';
-      }
+    function bjAppendCard(handIdx, card) {
+      document.getElementById(handIdx===0?'player-hand':'split-hand').appendChild(makeCardEl(card));
+      var hand=handIdx===0?bjPlayerHand:bjSplitHand;
+      document.getElementById(handIdx===0?'bj-player-score':'bj-split-score').textContent=bjCardVal(hand);
     }
-    function bjStatus(msg,cls='') { const e=document.getElementById('bj-status'); e.textContent=msg; e.className='game-status '+cls; }
+    function bjUpdateOutlines() {
+      if(!bjIsSplit) return;
+      document.getElementById('bj-hand1-area').style.outline=bjCurrentHand===0?'2px solid #4f46e5':'none';
+      document.getElementById('bj-hand2-area').style.outline=bjCurrentHand===1?'2px solid #4f46e5':'none';
+    }
+    function bjStatus(msg,cls){ var e=document.getElementById('bj-status'); e.textContent=msg; e.className='game-status '+(cls||''); }
     function bjUpdateDisplay() {
       document.getElementById('bj-chips').textContent=bjChips;
-      document.getElementById('bj-bet-display').textContent=bjIsSplit?`${bjBet}+${bjSplitBet}`:bjBet;
+      document.getElementById('bj-bet-display').textContent=bjIsSplit?bjBet+'+'+bjSplitBet:bjBet;
       document.getElementById('bj-deal-btn').disabled=bjBet===0;
     }
     function bjUpdateActionBtns() {
       if(bjPhase!=='playing') return;
-      const hand=bjActiveHand(), bet=bjActiveBet(), is2=hand.length===2;
-      const dbl=document.getElementById('bj-double-btn'), spl=document.getElementById('bj-split-btn');
+      var hand=bjActiveHand(),bet=bjActiveBet(),is2=hand.length===2;
+      var dbl=document.getElementById('bj-double-btn'),spl=document.getElementById('bj-split-btn');
       if(dbl) dbl.style.display=is2&&bjChipsAvail()>=bet?'':'none';
-      const canSpl=!bjIsSplit&&is2&&bjRankVal(bjPlayerHand[0].r)===bjRankVal(bjPlayerHand[1].r)&&bjChipsAvail()>=bjBet;
+      var canSpl=!bjIsSplit&&is2&&bjRankVal(bjPlayerHand[0].r)===bjRankVal(bjPlayerHand[1].r)&&bjChipsAvail()>=bjBet;
       if(spl) spl.style.display=canSpl?'':'none';
     }
-    function bjAddBet(n) { if(bjPhase!=='betting'||bjBet+n>bjChips) return; bjBet+=n; bjUpdateDisplay(); }
-    function bjClearBet() { if(bjPhase!=='betting') return; bjBet=0; bjUpdateDisplay(); }
+    function bjAddBet(n){if(bjPhase!=='betting'||bjBet+n>bjChips)return;bjBet+=n;bjUpdateDisplay();}
+    function bjClearBet(){if(bjPhase!=='betting')return;bjBet=0;bjUpdateDisplay();}
 
     function bjDeal() {
       if(bjBet===0) return;
@@ -367,35 +373,54 @@
       bjPlayerHand=[bjDeck.pop(),bjDeck.pop()];
       bjSplitHand=[]; bjDealerHand=[bjDeck.pop(),bjDeck.pop()];
       document.getElementById('bj-bet-section').style.display='none';
-      document.getElementById('bj-action-section').style.display='block';
+      document.getElementById('bj-action-section').style.display='none';
       document.getElementById('bj-hand2-area').style.display='none';
       document.getElementById('bj-hand1-area').style.outline='none';
-      bjRender(true); bjStatus("Your turn");
-      bjUpdateDisplay(); bjUpdateActionBtns();
-      if(bjCardVal(bjPlayerHand)===21) bjNextOrDealer();
+      document.getElementById('player-hand').innerHTML='';
+      document.getElementById('dealer-hand').innerHTML='';
+      document.getElementById('bj-player-score').textContent='';
+      document.getElementById('bj-dealer-score').textContent='';
+      bjStatus('Dealing…');
+      var ph=document.getElementById('player-hand'), dh=document.getElementById('dealer-hand');
+      var p0=bjPlayerHand[0],d0=bjDealerHand[0],p1=bjPlayerHand[1],d1=bjDealerHand[1];
+      setTimeout(function(){ph.appendChild(makeCardEl(p0));}, 0);
+      setTimeout(function(){dh.appendChild(makeCardEl(d0));}, 230);
+      setTimeout(function(){
+        ph.appendChild(makeCardEl(p1));
+        document.getElementById('bj-player-score').textContent=bjCardVal(bjPlayerHand);
+      }, 460);
+      setTimeout(function(){
+        var hole=makeCardEl(d1,true);
+        hole.setAttribute('data-hole','true');
+        dh.appendChild(hole);
+        document.getElementById('bj-dealer-score').textContent=bjCardVal([bjDealerHand[0]]);
+        document.getElementById('bj-action-section').style.display='block';
+        bjStatus('Your turn'); bjUpdateDisplay(); bjUpdateActionBtns();
+        if(bjCardVal(bjPlayerHand)===21) bjNextOrDealer();
+      }, 690);
     }
 
     function bjHit() {
-      bjActiveHand().push(bjDeck.pop());
-      bjRender(true);
-      const v=bjCardVal(bjActiveHand());
-      if(v>21) {
+      var card=bjDeck.pop();
+      bjActiveHand().push(card);
+      bjAppendCard(bjCurrentHand, card);
+      var v=bjCardVal(bjActiveHand());
+      if(v>21){
         if(bjIsSplit&&bjCurrentHand===0) bjStatus('Hand 1 busted!','lose');
         bjNextOrDealer();
-      } else if(v===21) {
-        bjNextOrDealer();
-      } else {
-        bjUpdateActionBtns();
-      }
+      } else if(v===21){ bjNextOrDealer(); }
+      else bjUpdateActionBtns();
     }
 
     function bjDouble() {
-      const bet=bjActiveBet();
+      var bet=bjActiveBet();
       if(bjChipsAvail()<bet) return;
       bjSetActiveBet(bet*2);
-      bjActiveHand().push(bjDeck.pop());
-      bjUpdateDisplay(); bjRender(true);
-      bjStatus(`Doubled → ${bjCardVal(bjActiveHand())}`);
+      var card=bjDeck.pop();
+      bjActiveHand().push(card);
+      bjAppendCard(bjCurrentHand, card);
+      bjUpdateDisplay();
+      bjStatus('Doubled → '+bjCardVal(bjActiveHand()));
       bjNextOrDealer();
     }
 
@@ -405,50 +430,71 @@
       bjSplitHand=[bjPlayerHand.pop()];
       bjPlayerHand.push(bjDeck.pop());
       bjSplitHand.push(bjDeck.pop());
+      var ph=document.getElementById('player-hand'), sh=document.getElementById('split-hand');
+      ph.innerHTML=''; sh.innerHTML='';
+      bjPlayerHand.forEach(function(c){ph.appendChild(makeCardEl(c));});
+      bjSplitHand.forEach(function(c){sh.appendChild(makeCardEl(c));});
+      document.getElementById('bj-player-score').textContent=bjCardVal(bjPlayerHand);
+      document.getElementById('bj-split-score').textContent=bjCardVal(bjSplitHand);
       document.getElementById('bj-hand2-area').style.display='block';
-      bjRender(true); bjStatus("Hand 1 — play your hand");
+      bjUpdateOutlines();
+      bjStatus('Hand 1 — play your hand');
       bjUpdateDisplay(); bjUpdateActionBtns();
     }
 
-    function bjStand() { bjNextOrDealer(); }
+    function bjStand(){ bjNextOrDealer(); }
 
     function bjNextOrDealer() {
-      if(bjIsSplit&&bjCurrentHand===0) {
-        bjCurrentHand=1;
-        bjRender(true); bjStatus("Hand 2 — play your hand");
-        bjUpdateActionBtns();
+      if(bjIsSplit&&bjCurrentHand===0){
+        bjCurrentHand=1; bjUpdateOutlines();
+        bjStatus('Hand 2 — play your hand'); bjUpdateActionBtns();
       } else {
         bjPhase='dealer';
         document.getElementById('bj-action-section').style.display='none';
-        bjRender(false);
-        const go=()=>{
-          if(bjCardVal(bjDealerHand)<17){bjDealerHand.push(bjDeck.pop());bjRender(false);setTimeout(go,500);}
-          else bjResolveAll();
-        };
-        setTimeout(go,400);
+        bjStatus("Dealer's turn…");
+        var holeEl=document.querySelector('.playing-card[data-hole]');
+        if(holeEl){
+          flipCardEl(holeEl, bjDealerHand[1]);
+          setTimeout(function(){
+            document.getElementById('bj-dealer-score').textContent=bjCardVal(bjDealerHand);
+            setTimeout(bjDealerLoop, 320);
+          }, 430);
+        } else {
+          setTimeout(bjDealerLoop, 400);
+        }
       }
     }
 
+    function bjDealerLoop() {
+      if(bjCardVal(bjDealerHand)<17){
+        var card=bjDeck.pop();
+        bjDealerHand.push(card);
+        document.getElementById('dealer-hand').appendChild(makeCardEl(card));
+        document.getElementById('bj-dealer-score').textContent=bjCardVal(bjDealerHand);
+        setTimeout(bjDealerLoop, 620);
+      } else { bjResolveAll(); }
+    }
+
     function bjResolveHand(hand, bet) {
-      const p=bjCardVal(hand), d=bjCardVal(bjDealerHand);
-      if(p>21) return {net:-bet, msg:`Bust(${p})`};
-      if(d>21) return {net:bet,  msg:`Dealer busts +$${bet}`};
-      if(p>d)  return {net:bet,  msg:`${p}>${d} +$${bet}`};
-      if(d>p)  return {net:-bet, msg:`${p}<${d} -$${bet}`};
-      return    {net:0,  msg:`${p}=${d} Push`};
+      var p=bjCardVal(hand), d=bjCardVal(bjDealerHand);
+      if(p>21) return {net:-bet,msg:'Bust('+p+')'};
+      if(d>21) return {net:bet, msg:'Dealer busts +$'+bet};
+      if(p>d)  return {net:bet, msg:p+'>'+d+' +$'+bet};
+      if(d>p)  return {net:-bet,msg:p+'<'+d+' -$'+bet};
+      return         {net:0,  msg:p+'='+d+' Push'};
     }
 
     function bjResolveAll() {
       bjPhase='done';
-      const r1=bjResolveHand(bjPlayerHand, bjBet);
+      var r1=bjResolveHand(bjPlayerHand,bjBet);
       bjChips+=r1.net;
-      let msg=r1.msg, totalNet=r1.net;
-      if(bjIsSplit) {
-        const r2=bjResolveHand(bjSplitHand, bjSplitBet);
+      var msg=r1.msg, totalNet=r1.net;
+      if(bjIsSplit){
+        var r2=bjResolveHand(bjSplitHand,bjSplitBet);
         bjChips+=r2.net; totalNet+=r2.net;
-        msg=`H1: ${r1.msg} | H2: ${r2.msg}`;
+        msg='H1: '+r1.msg+' | H2: '+r2.msg;
       }
-      if(bjChips<=0){bjChips=500; msg+=' | Reset $500.';}
+      if(bjChips<=0){bjChips=500;msg+=' | Reset $500.';}
       bjStatus(msg, totalNet>0?'win':totalNet<0?'lose':'push');
       document.getElementById('bj-action-section').style.display='none';
       document.getElementById('bj-new-btn').style.display='block';
@@ -456,96 +502,66 @@
     }
 
     function bjNewRound() {
-      bjBet=0; bjSplitBet=0; bjPhase='betting'; bjIsSplit=false; bjCurrentHand=0;
+      bjBet=0;bjSplitBet=0;bjPhase='betting';bjIsSplit=false;bjCurrentHand=0;
       document.getElementById('bj-new-btn').style.display='none';
       document.getElementById('bj-bet-section').style.display='block';
       document.getElementById('bj-hand2-area').style.display='none';
       document.getElementById('bj-hand1-area').style.outline='none';
-      document.getElementById('player-hand').innerHTML='';
-      document.getElementById('dealer-hand').innerHTML='';
-      document.getElementById('split-hand').innerHTML='';
-      document.getElementById('bj-player-score').textContent='';
-      document.getElementById('bj-dealer-score').textContent='';
-      document.getElementById('bj-split-score').textContent='';
+      ['player-hand','dealer-hand','split-hand'].forEach(function(id){document.getElementById(id).innerHTML='';});
+      ['bj-player-score','bj-dealer-score','bj-split-score'].forEach(function(id){document.getElementById(id).textContent='';});
       bjStatus('Place your bet!'); bjUpdateDisplay();
     }
-    bjChips=500; bjBet=0; bjSplitBet=0; bjPhase='betting'; bjIsSplit=false; bjCurrentHand=0; bjUpdateDisplay();
+    bjChips=500;bjBet=0;bjSplitBet=0;bjPhase='betting';bjIsSplit=false;bjCurrentHand=0;bjUpdateDisplay();
 
-    /* Three Card Poker */
-    const TCP_VAL={'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
-    let tcpDeck, tcpPlayerHand, tcpDealerHand, tcpChips, tcpAnte, tcpPairPlus, tcpPhase;
+    /* ===== Three Card Poker ===== */
+    var TCP_VAL={'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
+    var tcpDeck, tcpPlayerHand, tcpDealerHand, tcpChips, tcpAnte, tcpPairPlus, tcpPhase;
 
     function tcpEval(hand) {
-      const vals=hand.map(c=>TCP_VAL[c.r]).sort((a,b)=>a-b);
-      const suits=hand.map(c=>c.s);
-      const isFlush=suits[0]===suits[1]&&suits[1]===suits[2];
-      const isWheel=vals[0]===2&&vals[1]===3&&vals[2]===14;
-      const isStraight=isWheel||(vals[2]-vals[0]===2&&vals[1]-vals[0]===1);
-      const counts={};
-      for(const v of vals) counts[v]=(counts[v]||0)+1;
-      const maxCt=Math.max(...Object.values(counts));
-      let rank,name;
+      var vals=hand.map(function(c){return TCP_VAL[c.r];}).sort(function(a,b){return a-b;});
+      var suits=hand.map(function(c){return c.s;});
+      var isFlush=suits[0]===suits[1]&&suits[1]===suits[2];
+      var isWheel=vals[0]===2&&vals[1]===3&&vals[2]===14;
+      var isStraight=isWheel||(vals[2]-vals[0]===2&&vals[1]-vals[0]===1);
+      var counts={};
+      vals.forEach(function(v){counts[v]=(counts[v]||0)+1;});
+      var maxCt=Math.max.apply(null,Object.keys(counts).map(function(k){return counts[k];}));
+      var rank,name;
       if(isFlush&&isStraight){rank=6;name='Straight Flush';}
       else if(maxCt===3){rank=5;name='Three of a Kind';}
       else if(isStraight){rank=4;name='Straight';}
       else if(isFlush){rank=3;name='Flush';}
       else if(maxCt===2){rank=2;name='Pair';}
       else{rank=1;name='High Card';}
-      return {rank,name,vals,counts,isWheel};
+      return {rank:rank,name:name,vals:vals,counts:counts,isWheel:isWheel};
     }
 
     function tcpScore(e) {
-      const s=[...e.vals].sort((a,b)=>b-a);
+      var s=e.vals.slice().sort(function(a,b){return b-a;});
       if(e.rank===5) return 5000000+e.vals[1]*10000;
       if(e.rank===2){
-        const pr=+Object.keys(e.counts).find(k=>e.counts[k]===2);
-        const ki=+Object.keys(e.counts).find(k=>e.counts[k]===1);
+        var pr=+Object.keys(e.counts).filter(function(k){return e.counts[k]===2;})[0];
+        var ki=+Object.keys(e.counts).filter(function(k){return e.counts[k]===1;})[0];
         return 2000000+pr*10000+ki;
       }
-      if(e.rank===4||e.rank===6){const hi=e.isWheel?3:e.vals[2];return e.rank*1000000+hi*10000;}
+      if(e.rank===4||e.rank===6){var hi=e.isWheel?3:e.vals[2];return e.rank*1000000+hi*10000;}
       return e.rank*1000000+s[0]*10000+s[1]*100+s[2];
     }
 
-    function tcpQualifies(e) { return e.rank>=2||e.vals[2]>=12; }
+    function tcpQualifies(e){ return e.rank>=2||e.vals[2]>=12; }
+    function tcpAnteBonus(e){ if(e.rank===6)return 5; if(e.rank===5)return 4; if(e.rank===4)return 1; return 0; }
+    function tcpPPBonus(e)  { if(e.rank===6)return 40; if(e.rank===5)return 30; if(e.rank===4)return 6; if(e.rank===3)return 3; if(e.rank===2)return 1; return -1; }
 
-    function tcpAnteBonus(e) {
-      if(e.rank===6) return 5;
-      if(e.rank===5) return 4;
-      if(e.rank===4) return 1;
-      return 0;
-    }
-
-    function tcpPPBonus(e) {
-      if(e.rank===6) return 40;
-      if(e.rank===5) return 30;
-      if(e.rank===4) return 6;
-      if(e.rank===3) return 3;
-      if(e.rank===2) return 1;
-      return -1;
-    }
-
-    function tcpRender(hideDealer=true) {
-      const ph=document.getElementById('tcp-player-hand'), dh=document.getElementById('tcp-dealer-hand');
-      ph.innerHTML=''; dh.innerHTML='';
-      tcpPlayerHand.forEach(c=>ph.appendChild(makeCardEl(c,false)));
-      tcpDealerHand.forEach(c=>dh.appendChild(makeCardEl(c,hideDealer)));
-      const pe=tcpEval(tcpPlayerHand);
-      document.getElementById('tcp-player-name').textContent=pe.name;
-      document.getElementById('tcp-dealer-name').textContent=hideDealer?'':'';
-    }
-
-    function tcpStatus(msg,cls=''){const e=document.getElementById('tcp-status');e.textContent=msg;e.className='game-status '+cls;}
-
+    function tcpStatus(msg,cls){var e=document.getElementById('tcp-status');e.textContent=msg;e.className='game-status '+(cls||'');}
     function tcpUpdateDisplay(){
       document.getElementById('tcp-chips').textContent=tcpChips;
       document.getElementById('tcp-ante-disp').textContent=tcpAnte;
       document.getElementById('tcp-pp-disp').textContent=tcpPairPlus;
       document.getElementById('tcp-deal-btn').disabled=tcpAnte===0;
     }
-
     function tcpAddAnte(n){if(tcpPhase!=='betting'||tcpAnte+tcpPairPlus+n>tcpChips)return;tcpAnte+=n;tcpUpdateDisplay();}
-    function tcpAddPP(n){if(tcpPhase!=='betting'||tcpAnte+tcpPairPlus+n>tcpChips)return;tcpPairPlus+=n;tcpUpdateDisplay();}
-    function tcpClear(){if(tcpPhase!=='betting')return;tcpAnte=0;tcpPairPlus=0;tcpUpdateDisplay();}
+    function tcpAddPP(n)  {if(tcpPhase!=='betting'||tcpAnte+tcpPairPlus+n>tcpChips)return;tcpPairPlus+=n;tcpUpdateDisplay();}
+    function tcpClear()   {if(tcpPhase!=='betting')return;tcpAnte=0;tcpPairPlus=0;tcpUpdateDisplay();}
 
     function tcpDeal() {
       if(tcpAnte===0) return;
@@ -553,57 +569,66 @@
       tcpDeck=buildShuffledDeck();
       tcpPlayerHand=[tcpDeck.pop(),tcpDeck.pop(),tcpDeck.pop()];
       tcpDealerHand=[tcpDeck.pop(),tcpDeck.pop(),tcpDeck.pop()];
-      tcpRender(true);
       document.getElementById('tcp-bet-section').style.display='none';
-      document.getElementById('tcp-action-section').style.display='block';
-      document.getElementById('tcp-play-btn').textContent=`Play ($${tcpAnte})`;
-      tcpStatus("Look at your cards. Play or Fold?");
+      document.getElementById('tcp-action-section').style.display='none';
+      var ph=document.getElementById('tcp-player-hand'), dh=document.getElementById('tcp-dealer-hand');
+      ph.innerHTML=''; dh.innerHTML='';
+      document.getElementById('tcp-player-name').textContent='';
+      document.getElementById('tcp-dealer-name').textContent='';
+      tcpStatus('Dealing…');
+      var p=tcpPlayerHand, d=tcpDealerHand;
+      setTimeout(function(){dh.appendChild(makeCardEl(d[0],true));}, 0);
+      setTimeout(function(){ph.appendChild(makeCardEl(p[0]));}, 210);
+      setTimeout(function(){dh.appendChild(makeCardEl(d[1],true));}, 420);
+      setTimeout(function(){ph.appendChild(makeCardEl(p[1]));}, 630);
+      setTimeout(function(){dh.appendChild(makeCardEl(d[2],true));}, 840);
+      setTimeout(function(){
+        ph.appendChild(makeCardEl(p[2]));
+        document.getElementById('tcp-player-name').textContent=tcpEval(tcpPlayerHand).name;
+        document.getElementById('tcp-action-section').style.display='block';
+        document.getElementById('tcp-play-btn').textContent='Play ($'+tcpAnte+')';
+        tcpStatus('Look at your cards. Play or Fold?');
+      }, 1050);
     }
 
     function tcpResolve(played) {
       tcpPhase='done';
-      tcpRender(false);
-      const pe=tcpEval(tcpPlayerHand), de=tcpEval(tcpDealerHand);
-      document.getElementById('tcp-dealer-name').textContent=de.name;
-      let net=0, lines=[];
-
-      if(tcpPairPlus>0){
-        const m=tcpPPBonus(pe);
-        if(m>0){net+=tcpPairPlus*m;lines.push(`Pair Plus wins $${tcpPairPlus*m}! (${pe.name})`);}
-        else{net-=tcpPairPlus;lines.push(`Pair Plus loses $${tcpPairPlus}.`);}
+      document.getElementById('tcp-action-section').style.display='none';
+      tcpStatus('Dealer reveals…');
+      var dealerEls=document.getElementById('tcp-dealer-hand').querySelectorAll('.playing-card');
+      var dh=tcpDealerHand;
+      for(var i=0;i<dealerEls.length;i++){
+        (function(el,card){setTimeout(function(){flipCardEl(el,card);}, i*370);})(dealerEls[i],dh[i]);
       }
-
-      if(!played){
-        net-=tcpAnte;
-        lines.unshift(`Folded — lost Ante $${tcpAnte}.`);
-      } else {
-        const ab=tcpAnteBonus(pe);
-        if(ab>0){net+=tcpAnte*ab;lines.push(`Ante Bonus: $${tcpAnte*ab} (${pe.name})`);}
-
-        if(!tcpQualifies(de)){
-          net+=tcpAnte;
-          lines.unshift(`Dealer doesn't qualify (${de.name}). Ante wins $${tcpAnte}!`);
+      setTimeout(function(){
+        var pe=tcpEval(tcpPlayerHand), de=tcpEval(tcpDealerHand);
+        document.getElementById('tcp-dealer-name').textContent=de.name;
+        var net=0, lines=[];
+        if(tcpPairPlus>0){
+          var m=tcpPPBonus(pe);
+          if(m>0){net+=tcpPairPlus*m;lines.push('P+ +$'+tcpPairPlus*m+' ('+pe.name+')');}
+          else   {net-=tcpPairPlus;lines.push('P+ -$'+tcpPairPlus);}
+        }
+        if(!played){
+          net-=tcpAnte; lines.unshift('Folded — lost Ante $'+tcpAnte+'.');
         } else {
-          const cmp=tcpScore(pe)-tcpScore(de);
-          if(cmp>0){
-            net+=tcpAnte*2;
-            lines.unshift(`You win! ${pe.name} beats ${de.name}. +$${tcpAnte*2}`);
-          } else if(cmp<0){
-            net-=tcpAnte*2;
-            lines.unshift(`Dealer wins. ${de.name} beats ${pe.name}. -$${tcpAnte*2}`);
+          var ab=tcpAnteBonus(pe);
+          if(ab>0){net+=tcpAnte*ab;lines.push('Bonus +$'+tcpAnte*ab+' ('+pe.name+')');}
+          if(!tcpQualifies(de)){
+            net+=tcpAnte; lines.unshift('No qualify ('+de.name+'). Ante +$'+tcpAnte+'!');
           } else {
-            lines.unshift(`Tie! ${pe.name} — bets returned.`);
+            var cmp=tcpScore(pe)-tcpScore(de);
+            if(cmp>0){net+=tcpAnte*2;lines.unshift(pe.name+' beats '+de.name+'! +$'+tcpAnte*2);}
+            else if(cmp<0){net-=tcpAnte*2;lines.unshift(de.name+' wins. -$'+tcpAnte*2);}
+            else{lines.unshift('Tie! Bets returned.');}
           }
         }
-      }
-
-      tcpChips+=net;
-      if(tcpChips<=0){tcpChips=500;lines.push('Out of chips! Reset to $500.');}
-      const cls=net>0?'win':net<0?'lose':'push';
-      tcpStatus(lines.join(' | '), cls);
-      document.getElementById('tcp-action-section').style.display='none';
-      document.getElementById('tcp-new-btn').style.display='block';
-      tcpUpdateDisplay();
+        tcpChips+=net;
+        if(tcpChips<=0){tcpChips=500;lines.push('Reset $500.');}
+        tcpStatus(lines.join(' | '), net>0?'win':net<0?'lose':'push');
+        document.getElementById('tcp-new-btn').style.display='block';
+        tcpUpdateDisplay();
+      }, 3*370+220);
     }
 
     function tcpPlay(){tcpResolve(true);}
@@ -617,10 +642,8 @@
       document.getElementById('tcp-dealer-hand').innerHTML='';
       document.getElementById('tcp-player-name').textContent='';
       document.getElementById('tcp-dealer-name').textContent='';
-      tcpStatus('Place your Ante to start!');
-      tcpUpdateDisplay();
+      tcpStatus('Place your Ante to start!'); tcpUpdateDisplay();
     }
-
     tcpChips=500;tcpAnte=0;tcpPairPlus=0;tcpPhase='betting';tcpUpdateDisplay();
   </script>
 </body>
