@@ -240,9 +240,14 @@
   <script>
     /* ── Tab switching ── */
     function showTab(name, btn) {
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none';
+      });
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('panel-' + name).classList.add('active');
+      const panel = document.getElementById('panel-' + name);
+      panel.classList.add('active');
+      panel.style.display = 'flex';
       btn.classList.add('active');
     }
 
