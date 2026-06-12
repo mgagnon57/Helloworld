@@ -308,7 +308,7 @@
 
     /* ===== Blackjack ===== */
     var bjDeck, bjPlayerHand, bjSplitHand, bjDealerHand;
-    var bjChips, bjBet, bjSplitBet, bjPhase, bjIsSplit, bjCurrentHand;
+    var bjChips, bjBet, bjSplitBet, bjPhase, bjIsSplit, bjCurrentHand, bjLastBet;
 
     function bjCardVal(hand) {
       var t=0,a=0;
@@ -474,6 +474,7 @@
 
     function bjResolveAll() {
       bjPhase='done';
+      bjLastBet=bjBet;
       var r1=bjResolveHand(bjPlayerHand,bjBet);
       bjChips+=r1.net;
       var msg=r1.msg, totalNet=r1.net;
@@ -491,7 +492,7 @@
     }
 
     function bjNewRound() {
-      bjBet=0;bjSplitBet=0;bjPhase='betting';bjIsSplit=false;bjCurrentHand=0;
+      bjBet=bjLastBet>0?Math.min(bjLastBet,bjChips):0;bjSplitBet=0;bjPhase='betting';bjIsSplit=false;bjCurrentHand=0;
       document.getElementById('bj-new-btn').style.display='none';
       document.getElementById('bj-bet-section').style.display='block';
       document.getElementById('bj-hand2-area').style.display='none';
@@ -500,11 +501,11 @@
       ['bj-player-score','bj-dealer-score','bj-split-score'].forEach(function(id){document.getElementById(id).textContent='';});
       bjStatus('Place your bet!'); bjUpdateDisplay();
     }
-    bjChips=500;bjBet=0;bjSplitBet=0;bjPhase='betting';bjIsSplit=false;bjCurrentHand=0;bjUpdateDisplay();
+    bjChips=500;bjBet=0;bjLastBet=0;bjSplitBet=0;bjPhase='betting';bjIsSplit=false;bjCurrentHand=0;bjUpdateDisplay();
 
     /* ===== Three Card Poker ===== */
     var TCP_VAL={'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
-    var tcpDeck, tcpPlayerHand, tcpDealerHand, tcpChips, tcpAnte, tcpPairPlus, tcpPhase, tcpRevealedCount;
+    var tcpDeck, tcpPlayerHand, tcpDealerHand, tcpChips, tcpAnte, tcpPairPlus, tcpPhase, tcpRevealedCount, tcpLastAnte, tcpLastPairPlus;
 
     function tcpEval(hand) {
       var vals=hand.map(function(c){return TCP_VAL[c.r];}).sort(function(a,b){return a-b;});
@@ -617,6 +618,7 @@
           else{lines.unshift('Tie! Bets returned.');}
         }
       }
+      tcpLastAnte=tcpAnte; tcpLastPairPlus=tcpPairPlus;
       tcpChips+=net;
       if(tcpChips<=0){tcpChips=500;lines.push('Reset $500.');}
       tcpStatus(lines.join(' | '), net>0?'win':net<0?'lose':'push');
@@ -649,7 +651,9 @@
     function tcpFold(){tcpResolve(false);}
 
     function tcpNewRound(){
-      tcpAnte=0;tcpPairPlus=0;tcpPhase='betting';tcpRevealedCount=0;
+      tcpAnte=tcpLastAnte>0?Math.min(tcpLastAnte,tcpChips):0;
+      tcpPairPlus=tcpLastPairPlus>0?Math.min(tcpLastPairPlus,tcpChips-tcpAnte):0;
+      tcpPhase='betting';tcpRevealedCount=0;
       document.getElementById('tcp-new-btn').style.display='none';
       document.getElementById('tcp-bet-section').style.display='block';
       document.getElementById('tcp-player-hand').innerHTML='';
@@ -658,7 +662,7 @@
       document.getElementById('tcp-dealer-name').textContent='';
       tcpStatus('Place your Ante to start!'); tcpUpdateDisplay();
     }
-    tcpChips=500;tcpAnte=0;tcpPairPlus=0;tcpPhase='betting';tcpUpdateDisplay();
+    tcpChips=500;tcpAnte=0;tcpPairPlus=0;tcpLastAnte=0;tcpLastPairPlus=0;tcpPhase='betting';tcpUpdateDisplay();
   </script>
 </body>
 </html>
