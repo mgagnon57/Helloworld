@@ -657,16 +657,6 @@
       tcpRevealedCount++;
       if(tcpRevealedCount===3){
         document.getElementById('tcp-player-name').textContent=tcpEval(tcpPlayerHand).name;
-        var dealerEls=document.getElementById('tcp-dealer-hand').querySelectorAll('.playing-card');
-        var dCards=tcpDealerHand;
-        for(var di=0;di<dealerEls.length;di++){
-          (function(del,dcard,delay){setTimeout(function(){flipCardEl(del,dcard);},delay);})(dealerEls[di],dCards[di],400+di*370);
-        }
-        setTimeout(function(){
-          document.getElementById('tcp-dealer-name').textContent=tcpEval(tcpDealerHand).name;
-          tcpDealerRevealed=true;
-          tcpStatus('Play or Fold?');
-        }, 400+3*370+220);
       }
     }
 
