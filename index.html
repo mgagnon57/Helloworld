@@ -14,15 +14,12 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      min-height: 100vh;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; flex-direction: column;
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* ── Tab bar ── */
     .tabs {
       display: flex;
       background: rgba(0,0,0,0.25);
@@ -30,49 +27,19 @@
       gap: 4px;
     }
     .tab-btn {
-      flex: 1;
-      padding: 10px 0;
-      border: none;
+      flex: 1; padding: 10px 0; border: none;
       border-radius: 10px 10px 0 0;
       background: rgba(255,255,255,0.15);
       color: rgba(255,255,255,0.7);
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      transition: background 0.2s, color 0.2s;
+      font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation; transition: background 0.2s, color 0.2s;
     }
-    .tab-btn.active {
-      background: #fff;
-      color: #4f46e5;
-    }
+    .tab-btn.active { background: #fff; color: #4f46e5; }
 
-    /* ── Panels ── */
-    .panel { display: none; flex: 1; align-items: center; justify-content: center; padding: 24px 16px; }
+    .panel { display: none; flex: 1; align-items: center; justify-content: center; padding: 20px 16px; overflow-y: auto; }
     .panel.active { display: flex; }
 
-    /* ── Hello card ── */
-    .card {
-      background: #fff;
-      border-radius: 24px;
-      padding: 48px 36px;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-      max-width: 360px;
-      width: 100%;
-    }
-    .avatar {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 24px; font-size: 36px;
-    }
-    .card h1 {
-      font-size: clamp(1.75rem, 8vw, 2.25rem);
-      color: #1e1b4b; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px;
-    }
-    .card p { color: #6b7280; font-size: 1rem; line-height: 1.6; margin-bottom: 32px; }
     .btn {
       display: inline-block;
       background: linear-gradient(135deg, #4f46e5, #7c3aed);
@@ -82,41 +49,32 @@
       touch-action: manipulation; transition: opacity 0.2s;
     }
     .btn:active { opacity: 0.8; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
 
-    /* ── Tic Tac Toe ── */
-    .ttt {
-      background: #fff;
-      border-radius: 24px;
-      padding: 28px 24px;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-      max-width: 360px;
-      width: 100%;
+    .card {
+      background: #fff; border-radius: 24px; padding: 48px 36px;
+      text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      max-width: 360px; width: 100%;
     }
+    .avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 36px;
+    }
+    .card h1 { font-size: clamp(1.75rem, 8vw, 2.25rem); color: #1e1b4b; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; }
+    .card p { color: #6b7280; font-size: 1rem; line-height: 1.6; margin-bottom: 32px; }
+
+    .ttt { background: #fff; border-radius: 24px; padding: 28px 24px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-width: 360px; width: 100%; }
     .ttt h2 { color: #1e1b4b; font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; }
-    .ttt-status {
-      color: #6b7280; font-size: 0.95rem; margin-bottom: 20px; min-height: 1.4em;
-    }
+    .ttt-status { color: #6b7280; font-size: 0.95rem; margin-bottom: 20px; min-height: 1.4em; }
     .ttt-status.win { color: #4f46e5; font-weight: 700; font-size: 1.05rem; }
-
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
-    }
+    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
     .cell {
-      aspect-ratio: 1;
-      background: #f3f4f6;
-      border-radius: 12px;
-      border: none;
-      font-size: clamp(2rem, 10vw, 2.8rem);
-      font-weight: 800;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      transition: background 0.15s, transform 0.1s;
-      color: #1e1b4b;
+      aspect-ratio: 1; background: #f3f4f6; border-radius: 12px; border: none;
+      font-size: clamp(2rem, 10vw, 2.8rem); font-weight: 800;
+      cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+      transition: background 0.15s, transform 0.1s; color: #1e1b4b;
       display: flex; align-items: center; justify-content: center;
     }
     .cell:active { transform: scale(0.93); }
@@ -124,18 +82,62 @@
     .cell.o { color: #7c3aed; background: #f5f3ff; }
     .cell.win-cell { background: #4f46e5; color: #fff; }
     .cell:disabled { cursor: default; }
-
     .ttt .btn { width: 100%; }
+
+    .bj {
+      background: #fff; border-radius: 24px; padding: 20px 20px 24px;
+      text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      max-width: 380px; width: 100%;
+    }
+    .bj h2 { color: #1e1b4b; font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    .bj-chips { color: #4f46e5; font-weight: 700; font-size: 0.95rem; margin-bottom: 12px; }
+    .bj-status { min-height: 1.5em; font-size: 1rem; font-weight: 700; margin-bottom: 12px; color: #1e1b4b; }
+    .bj-status.win  { color: #16a34a; }
+    .bj-status.lose { color: #dc2626; }
+    .bj-status.push { color: #d97706; }
+    .bj-area { margin-bottom: 10px; }
+    .bj-label { font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+    .bj-score { font-size: 1.1rem; font-weight: 800; color: #1e1b4b; margin-bottom: 8px; }
+    .hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; min-height: 72px; }
+    .playing-card {
+      width: 46px; height: 66px; border-radius: 7px;
+      border: 1.5px solid #e5e7eb;
+      background: #fff; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 800; line-height: 1;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .playing-card .rank { font-size: 0.85rem; }
+    .playing-card .suit { font-size: 1.1rem; }
+    .playing-card.red { color: #dc2626; }
+    .playing-card.black { color: #1e1b4b; }
+    .playing-card.face-down { background: linear-gradient(135deg, #4f46e5, #7c3aed); border-color: #4f46e5; }
+    .divider { border: none; border-top: 1px solid #f3f4f6; margin: 12px 0; }
+    .bj-bet-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .chip-btn {
+      width: 52px; height: 52px; border-radius: 50%; border: 3px solid;
+      font-weight: 800; font-size: 0.85rem; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .chip-btn:active { transform: scale(0.9); }
+    .chip-btn:disabled { opacity: 0.35; cursor: default; }
+    .chip-5   { background: #fee2e2; border-color: #dc2626; color: #dc2626; }
+    .chip-10  { background: #dbeafe; border-color: #2563eb; color: #2563eb; }
+    .chip-25  { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
+    .chip-100 { background: #fef9c3; border-color: #ca8a04; color: #ca8a04; }
+    .bj-actions { display: flex; gap: 8px; }
+    .bj-actions .btn { flex: 1; padding: 12px 0; font-size: 0.95rem; }
   </style>
 </head>
 <body>
 
   <nav class="tabs">
     <button class="tab-btn active" onclick="showTab('hello', this)">👋 Hello</button>
-    <button class="tab-btn" onclick="showTab('ttt', this)">🎮 Tic Tac Toe</button>
+    <button class="tab-btn" onclick="showTab('ttt', this)">🎮 TTT</button>
+    <button class="tab-btn" onclick="showTab('bj', this)">🃏 Blackjack</button>
   </nav>
 
-  <!-- Hello panel -->
   <div id="panel-hello" class="panel active">
     <div class="card">
       <div class="avatar">👋</div>
@@ -145,12 +147,11 @@
     </div>
   </div>
 
-  <!-- Tic Tac Toe panel -->
   <div id="panel-ttt" class="panel">
     <div class="ttt">
       <h2>Tic Tac Toe</h2>
       <div class="ttt-status" id="ttt-status">X goes first</div>
-      <div class="board" id="board">
+      <div class="board">
         <button class="cell" onclick="move(0)"></button>
         <button class="cell" onclick="move(1)"></button>
         <button class="cell" onclick="move(2)"></button>
@@ -165,6 +166,44 @@
     </div>
   </div>
 
+  <div id="panel-bj" class="panel">
+    <div class="bj">
+      <h2>Blackjack</h2>
+      <div class="bj-chips">💰 Chips: <span id="bj-chips">500</span> &nbsp;|&nbsp; Bet: <span id="bj-bet-display">0</span></div>
+      <div class="bj-area">
+        <div class="bj-label">Dealer</div>
+        <div class="bj-score" id="dealer-score">-</div>
+        <div class="hand" id="dealer-hand"></div>
+      </div>
+      <hr class="divider" />
+      <div class="bj-area">
+        <div class="bj-label">You</div>
+        <div class="bj-score" id="player-score">-</div>
+        <div class="hand" id="player-hand"></div>
+      </div>
+      <div class="bj-status" id="bj-status">Place your bet!</div>
+      <div id="bj-bet-section">
+        <div class="bj-bet-row">
+          <button class="chip-btn chip-5"   onclick="bjBet(5)">$5</button>
+          <button class="chip-btn chip-10"  onclick="bjBet(10)">$10</button>
+          <button class="chip-btn chip-25"  onclick="bjBet(25)">$25</button>
+          <button class="chip-btn chip-100" onclick="bjBet(100)">$100</button>
+        </div>
+        <div class="bj-actions">
+          <button class="btn" id="bj-deal-btn" onclick="bjDeal()" disabled>Deal</button>
+          <button class="btn" style="background:linear-gradient(135deg,#6b7280,#9ca3af)" onclick="bjClearBet()">Clear</button>
+        </div>
+      </div>
+      <div id="bj-action-section" style="display:none">
+        <div class="bj-actions">
+          <button class="btn" onclick="bjHit()">Hit</button>
+          <button class="btn" onclick="bjStand()">Stand</button>
+        </div>
+      </div>
+      <button class="btn" id="bj-new-btn" onclick="bjNewRound()" style="display:none;width:100%;margin-top:4px">New Round</button>
+    </div>
+  </div>
+
   <script>
     function showTab(name, btn) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -173,49 +212,177 @@
       btn.classList.add('active');
     }
 
-    const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    let board, current, over;
+    const TTT_WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    let tttBoard, tttCurrent, tttOver;
 
     function resetGame() {
-      board = Array(9).fill('');
-      current = 'X';
-      over = false;
-      const cells = document.querySelectorAll('.cell');
-      cells.forEach(c => {
-        c.textContent = '';
-        c.className = 'cell';
-        c.disabled = false;
-      });
-      document.getElementById('ttt-status').className = 'ttt-status';
-      document.getElementById('ttt-status').textContent = 'X goes first';
+      tttBoard = Array(9).fill('');
+      tttCurrent = 'X'; tttOver = false;
+      document.querySelectorAll('.cell').forEach(c => { c.textContent = ''; c.className = 'cell'; c.disabled = false; });
+      const s = document.getElementById('ttt-status');
+      s.className = 'ttt-status'; s.textContent = 'X goes first';
     }
 
     function move(i) {
-      if (over || board[i]) return;
-      board[i] = current;
+      if (tttOver || tttBoard[i]) return;
+      tttBoard[i] = tttCurrent;
       const cell = document.querySelectorAll('.cell')[i];
-      cell.textContent = current;
-      cell.classList.add(current.toLowerCase());
+      cell.textContent = tttCurrent;
+      cell.classList.add(tttCurrent.toLowerCase());
       cell.disabled = true;
-
-      const win = WINS.find(([a,b,c]) => board[a] && board[a] === board[b] && board[a] === board[c]);
+      const win = TTT_WINS.find(([a,b,c]) => tttBoard[a] && tttBoard[a] === tttBoard[b] && tttBoard[a] === tttBoard[c]);
       if (win) {
-        over = true;
+        tttOver = true;
         win.forEach(idx => document.querySelectorAll('.cell')[idx].classList.add('win-cell'));
         const s = document.getElementById('ttt-status');
-        s.textContent = current + ' wins! 🎉';
-        s.className = 'ttt-status win';
+        s.textContent = tttCurrent + ' wins! 🎉'; s.className = 'ttt-status win';
         document.querySelectorAll('.cell').forEach(c => c.disabled = true);
-      } else if (board.every(Boolean)) {
-        over = true;
+      } else if (tttBoard.every(Boolean)) {
+        tttOver = true;
         document.getElementById('ttt-status').textContent = "It's a draw!";
       } else {
-        current = current === 'X' ? 'O' : 'X';
-        document.getElementById('ttt-status').textContent = current + "'s turn";
+        tttCurrent = tttCurrent === 'X' ? 'O' : 'X';
+        document.getElementById('ttt-status').textContent = tttCurrent + "'s turn";
       }
     }
-
     resetGame();
+
+    const SUITS = ['♠','♥','♦','♣'];
+    const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    let bjDeck, bjPlayerHand, bjDealerHand, bjChips, bjBet, bjPhase;
+
+    function buildDeck() {
+      const d = [];
+      for (const s of SUITS) for (const r of RANKS) d.push({r, s});
+      for (let i = d.length - 1; i > 0; i--) { const j = Math.random() * (i+1) | 0; [d[i], d[j]] = [d[j], d[i]]; }
+      return d;
+    }
+
+    function cardValue(hand) {
+      let total = 0, aces = 0;
+      for (const {r} of hand) {
+        if (r === 'A') { total += 11; aces++; }
+        else if (['J','Q','K'].includes(r)) total += 10;
+        else total += +r;
+      }
+      while (total > 21 && aces--) total -= 10;
+      return total;
+    }
+
+    function cardEl({r, s}, faceDown = false) {
+      const el = document.createElement('div');
+      if (faceDown) { el.className = 'playing-card face-down'; el.innerHTML = '🂠'; return el; }
+      const red = s === '♥' || s === '♦';
+      el.className = 'playing-card ' + (red ? 'red' : 'black');
+      el.innerHTML = `<span class="rank">${r}</span><span class="suit">${s}</span>`;
+      return el;
+    }
+
+    function renderHands(hideDealer = false) {
+      const ph = document.getElementById('player-hand');
+      const dh = document.getElementById('dealer-hand');
+      ph.innerHTML = ''; dh.innerHTML = '';
+      bjPlayerHand.forEach(c => ph.appendChild(cardEl(c)));
+      bjDealerHand.forEach((c, i) => dh.appendChild(cardEl(c, hideDealer && i === 1)));
+      document.getElementById('player-score').textContent = cardValue(bjPlayerHand);
+      document.getElementById('dealer-score').textContent = hideDealer
+        ? cardValue([bjDealerHand[0]])
+        : cardValue(bjDealerHand);
+    }
+
+    function bjSetStatus(msg, cls = '') {
+      const el = document.getElementById('bj-status');
+      el.textContent = msg; el.className = 'bj-status ' + cls;
+    }
+
+    function bjUpdateChipDisplay() {
+      document.getElementById('bj-chips').textContent = bjChips;
+      document.getElementById('bj-bet-display').textContent = bjBet;
+      document.getElementById('bj-deal-btn').disabled = bjBet === 0;
+    }
+
+    function bjBet(amount) {
+      if (bjPhase !== 'betting') return;
+      if (bjBet + amount > bjChips) return;
+      bjBet += amount;
+      bjUpdateChipDisplay();
+    }
+
+    function bjClearBet() {
+      if (bjPhase !== 'betting') return;
+      bjBet = 0; bjUpdateChipDisplay();
+    }
+
+    function bjDeal() {
+      if (bjBet === 0) return;
+      bjPhase = 'playing';
+      bjDeck = buildDeck();
+      bjPlayerHand = [bjDeck.pop(), bjDeck.pop()];
+      bjDealerHand = [bjDeck.pop(), bjDeck.pop()];
+      document.getElementById('bj-bet-section').style.display = 'none';
+      document.getElementById('bj-action-section').style.display = 'block';
+      renderHands(true);
+      bjSetStatus("Your turn");
+      if (cardValue(bjPlayerHand) === 21) { bjStand(); }
+    }
+
+    function bjHit() {
+      bjPlayerHand.push(bjDeck.pop());
+      renderHands(true);
+      if (cardValue(bjPlayerHand) > 21) bjEndRound('bust');
+    }
+
+    function bjStand() {
+      bjPhase = 'dealer';
+      renderHands(false);
+      const dealerPlay = () => {
+        if (cardValue(bjDealerHand) < 17) {
+          bjDealerHand.push(bjDeck.pop());
+          renderHands(false);
+          setTimeout(dealerPlay, 500);
+        } else {
+          bjEndRound('compare');
+        }
+      };
+      setTimeout(dealerPlay, 400);
+    }
+
+    function bjEndRound(reason) {
+      bjPhase = 'done';
+      renderHands(false);
+      const p = cardValue(bjPlayerHand), d = cardValue(bjDealerHand);
+      let msg, cls;
+      if (reason === 'bust') {
+        msg = `Bust! You had ${p}. You lose $${bjBet}.`; cls = 'lose'; bjChips -= bjBet;
+      } else if (d > 21) {
+        msg = `Dealer busts! You win $${bjBet}!`; cls = 'win'; bjChips += bjBet;
+      } else if (p > d) {
+        msg = `${p} vs ${d} — You win $${bjBet}!`; cls = 'win'; bjChips += bjBet;
+      } else if (d > p) {
+        msg = `${p} vs ${d} — Dealer wins. You lose $${bjBet}.`; cls = 'lose'; bjChips -= bjBet;
+      } else {
+        msg = `${p} vs ${d} — Push! Bet returned.`; cls = 'push';
+      }
+      bjSetStatus(msg, cls);
+      document.getElementById('bj-action-section').style.display = 'none';
+      document.getElementById('bj-new-btn').style.display = 'block';
+      if (bjChips <= 0) { bjSetStatus("Out of chips! Resetting to $500.", 'lose'); bjChips = 500; }
+    }
+
+    function bjNewRound() {
+      bjBet = 0; bjPhase = 'betting';
+      document.getElementById('bj-new-btn').style.display = 'none';
+      document.getElementById('bj-bet-section').style.display = 'block';
+      document.getElementById('player-hand').innerHTML = '';
+      document.getElementById('dealer-hand').innerHTML = '';
+      document.getElementById('player-score').textContent = '-';
+      document.getElementById('dealer-score').textContent = '-';
+      bjSetStatus('Place your bet!');
+      bjUpdateChipDisplay();
+    }
+
+    bjChips = 500; bjBet = 0; bjPhase = 'betting';
+    bjUpdateChipDisplay();
   </script>
 </body>
 </html>
