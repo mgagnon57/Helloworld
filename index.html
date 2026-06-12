@@ -517,7 +517,7 @@
 
     /* ===== Three Card Poker ===== */
     var TCP_VAL={'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
-    var tcpDeck, tcpPlayerHand, tcpDealerHand, tcpChips, tcpAnte, tcpPairPlus, tcpPhase, tcpRevealedCount, tcpDealerRevealed;
+    var tcpDeck, tcpPlayerHand, tcpDealerHand, tcpChips, tcpAnte, tcpPairPlus, tcpPhase, tcpRevealedCount;
 
     function tcpEval(hand) {
       var vals=hand.map(function(c){return TCP_VAL[c.r];}).sort(function(a,b){return a-b;});
@@ -577,7 +577,7 @@
       ph.innerHTML=''; dh.innerHTML='';
       document.getElementById('tcp-player-name').textContent='';
       document.getElementById('tcp-dealer-name').textContent='';
-      tcpRevealedCount=0; tcpDealerRevealed=false;
+      tcpRevealedCount=0;
       tcpStatus('Dealing…');
       var p=tcpPlayerHand, d=tcpDealerHand;
       setTimeout(function(){dh.appendChild(makeCardEl(d[0],true));}, 0);
@@ -596,20 +596,16 @@
     function tcpResolve(played) {
       tcpPhase='done';
       document.getElementById('tcp-action-section').style.display='none';
-      if(!tcpDealerRevealed){
-        tcpStatus('Dealer reveals…');
-        var dealerEls=document.getElementById('tcp-dealer-hand').querySelectorAll('.playing-card');
-        var dh=tcpDealerHand;
-        for(var i=0;i<dealerEls.length;i++){
-          (function(el,card,delay){setTimeout(function(){flipCardEl(el,card);},delay);})(dealerEls[i],dh[i],i*370);
-        }
-        setTimeout(function(){
-          document.getElementById('tcp-dealer-name').textContent=tcpEval(tcpDealerHand).name;
-          tcpFinishResolve(played);
-        }, 3*370+220);
-      } else {
-        tcpFinishResolve(played);
+      tcpStatus('Dealer reveals…');
+      var dealerEls=document.getElementById('tcp-dealer-hand').querySelectorAll('.playing-card');
+      var dh=tcpDealerHand;
+      for(var i=0;i<dealerEls.length;i++){
+        (function(el,card,delay){setTimeout(function(){flipCardEl(el,card);},delay);})(dealerEls[i],dh[i],i*370);
       }
+      setTimeout(function(){
+        document.getElementById('tcp-dealer-name').textContent=tcpEval(tcpDealerHand).name;
+        tcpFinishResolve(played);
+      }, 3*370+220);
     }
     function tcpFinishResolve(played) {
       var pe=tcpEval(tcpPlayerHand), de=tcpEval(tcpDealerHand);
@@ -657,16 +653,6 @@
       tcpRevealedCount++;
       if(tcpRevealedCount===3){
         document.getElementById('tcp-player-name').textContent=tcpEval(tcpPlayerHand).name;
-        var dealerEls=document.getElementById('tcp-dealer-hand').querySelectorAll('.playing-card');
-        var dCards=tcpDealerHand;
-        for(var di=0;di<dealerEls.length;di++){
-          (function(del,dcard,delay){setTimeout(function(){flipCardEl(del,dcard);},delay);})(dealerEls[di],dCards[di],400+di*370);
-        }
-        setTimeout(function(){
-          document.getElementById('tcp-dealer-name').textContent=tcpEval(tcpDealerHand).name;
-          tcpDealerRevealed=true;
-          tcpStatus('Play or Fold?');
-        }, 400+3*370+220);
       }
     }
 
@@ -674,7 +660,7 @@
     function tcpFold(){tcpResolve(false);}
 
     function tcpNewRound(){
-      tcpAnte=0;tcpPairPlus=0;tcpPhase='betting';tcpRevealedCount=0;tcpDealerRevealed=false;
+      tcpAnte=0;tcpPairPlus=0;tcpPhase='betting';tcpRevealedCount=0;
       document.getElementById('tcp-new-btn').style.display='none';
       document.getElementById('tcp-bet-section').style.display='block';
       document.getElementById('tcp-player-hand').innerHTML='';
