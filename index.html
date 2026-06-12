@@ -587,50 +587,39 @@
       setTimeout(function(){dh.appendChild(makeCardEl(d[2],true));}, 840);
       setTimeout(function(){
         ph.appendChild(tcpMakePlayerCard(p[2],2));
-        document.getElementById('tcp-action-section').style.display='block';
-        document.getElementById('tcp-play-btn').textContent='Play ($'+tcpAnte+')';
-        tcpStatus('Tap cards to peek. Play or Fold?');
+        tcpStatus('Tap your cards to reveal them.');
       }, 1050);
     }
 
     function tcpResolve(played) {
       tcpPhase='done';
       document.getElementById('tcp-action-section').style.display='none';
-      tcpStatus('Dealer reveals…');
-      var dealerEls=document.getElementById('tcp-dealer-hand').querySelectorAll('.playing-card');
-      var dh=tcpDealerHand;
-      for(var i=0;i<dealerEls.length;i++){
-        (function(el,card){setTimeout(function(){flipCardEl(el,card);}, i*370);})(dealerEls[i],dh[i]);
+      var pe=tcpEval(tcpPlayerHand), de=tcpEval(tcpDealerHand);
+      var net=0, lines=[];
+      if(tcpPairPlus>0){
+        var m=tcpPPBonus(pe);
+        if(m>0){net+=tcpPairPlus*m;lines.push('P+ +$'+tcpPairPlus*m+' ('+pe.name+')');}
+        else   {net-=tcpPairPlus;lines.push('P+ -$'+tcpPairPlus);}
       }
-      setTimeout(function(){
-        var pe=tcpEval(tcpPlayerHand), de=tcpEval(tcpDealerHand);
-        document.getElementById('tcp-dealer-name').textContent=de.name;
-        var net=0, lines=[];
-        if(tcpPairPlus>0){
-          var m=tcpPPBonus(pe);
-          if(m>0){net+=tcpPairPlus*m;lines.push('P+ +$'+tcpPairPlus*m+' ('+pe.name+')');}
-          else   {net-=tcpPairPlus;lines.push('P+ -$'+tcpPairPlus);}
-        }
-        if(!played){
-          net-=tcpAnte; lines.unshift('Folded — lost Ante $'+tcpAnte+'.');
+      if(!played){
+        net-=tcpAnte; lines.unshift('Folded — lost Ante $'+tcpAnte+'.');
+      } else {
+        var ab=tcpAnteBonus(pe);
+        if(ab>0){net+=tcpAnte*ab;lines.push('Bonus +$'+tcpAnte*ab+' ('+pe.name+')');}
+        if(!tcpQualifies(de)){
+          net+=tcpAnte; lines.unshift('No qualify ('+de.name+'). Ante +$'+tcpAnte+'!');
         } else {
-          var ab=tcpAnteBonus(pe);
-          if(ab>0){net+=tcpAnte*ab;lines.push('Bonus +$'+tcpAnte*ab+' ('+pe.name+')');}
-          if(!tcpQualifies(de)){
-            net+=tcpAnte; lines.unshift('No qualify ('+de.name+'). Ante +$'+tcpAnte+'!');
-          } else {
-            var cmp=tcpScore(pe)-tcpScore(de);
-            if(cmp>0){net+=tcpAnte*2;lines.unshift(pe.name+' beats '+de.name+'! +$'+tcpAnte*2);}
-            else if(cmp<0){net-=tcpAnte*2;lines.unshift(de.name+' wins. -$'+tcpAnte*2);}
-            else{lines.unshift('Tie! Bets returned.');}
-          }
+          var cmp=tcpScore(pe)-tcpScore(de);
+          if(cmp>0){net+=tcpAnte*2;lines.unshift(pe.name+' beats '+de.name+'! +$'+tcpAnte*2);}
+          else if(cmp<0){net-=tcpAnte*2;lines.unshift(de.name+' wins. -$'+tcpAnte*2);}
+          else{lines.unshift('Tie! Bets returned.');}
         }
-        tcpChips+=net;
-        if(tcpChips<=0){tcpChips=500;lines.push('Reset $500.');}
-        tcpStatus(lines.join(' | '), net>0?'win':net<0?'lose':'push');
-        document.getElementById('tcp-new-btn').style.display='block';
-        tcpUpdateDisplay();
-      }, 3*370+220);
+      }
+      tcpChips+=net;
+      if(tcpChips<=0){tcpChips=500;lines.push('Reset $500.');}
+      tcpStatus(lines.join(' | '), net>0?'win':net<0?'lose':'push');
+      document.getElementById('tcp-new-btn').style.display='block';
+      tcpUpdateDisplay();
     }
 
     function tcpMakePlayerCard(card, idx) {
@@ -649,9 +638,18 @@
       flipCardEl(el, tcpPlayerHand[idx]);
       tcpRevealedCount++;
       if(tcpRevealedCount===3){
+        var dealerEls=document.getElementById('tcp-dealer-hand').querySelectorAll('.playing-card');
+        var dCards=tcpDealerHand;
+        for(var di=0;di<dealerEls.length;di++){
+          (function(del,dcard,delay){setTimeout(function(){flipCardEl(del,dcard);},delay);})(dealerEls[di],dCards[di],400+di*370);
+        }
         setTimeout(function(){
           document.getElementById('tcp-player-name').textContent=tcpEval(tcpPlayerHand).name;
-        }, 400);
+          document.getElementById('tcp-dealer-name').textContent=tcpEval(tcpDealerHand).name;
+          document.getElementById('tcp-play-btn').textContent='Play ($'+tcpAnte+')';
+          document.getElementById('tcp-action-section').style.display='block';
+          tcpStatus('Play or Fold?');
+        }, 400+3*370+220);
       }
     }
 
