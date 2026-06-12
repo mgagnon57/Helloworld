@@ -149,10 +149,15 @@
         <div class="hand-name" id="bj-dealer-score"></div>
       </div>
       <hr class="divider"/>
-      <div class="hand-area">
+      <div class="hand-area" id="bj-hand1-area">
         <div class="hand-label">You</div>
         <div class="hand" id="player-hand"></div>
         <div class="hand-name" id="bj-player-score"></div>
+      </div>
+      <div class="hand-area" id="bj-hand2-area" style="display:none">
+        <div class="hand-label" id="bj-hand2-label">Hand 2</div>
+        <div class="hand" id="split-hand"></div>
+        <div class="hand-name" id="bj-split-score"></div>
       </div>
       <div class="game-status" id="bj-status">Place your bet!</div>
       <div id="bj-bet-section">
@@ -168,9 +173,11 @@
         </div>
       </div>
       <div id="bj-action-section" style="display:none">
-        <div class="action-row">
+        <div class="action-row" style="flex-wrap:wrap">
           <button class="btn" onclick="bjHit()">Hit</button>
           <button class="btn" onclick="bjStand()">Stand</button>
+          <button class="btn" id="bj-double-btn" onclick="bjDouble()" style="background:linear-gradient(135deg,#d97706,#f59e0b);display:none">Double</button>
+          <button class="btn" id="bj-split-btn" onclick="bjSplitHands()" style="background:linear-gradient(135deg,#16a34a,#22c55e);display:none">Split</button>
         </div>
       </div>
       <button class="btn" id="bj-new-btn" onclick="bjNewRound()" style="display:none;width:100%;margin-top:8px">New Round</button>
@@ -301,7 +308,8 @@
     resetGame();
 
     /* ── Blackjack ── */
-    let bjDeck, bjPlayerHand, bjDealerHand, bjChips, bjBet, bjPhase;
+    let bjDeck, bjPlayerHand, bjSplitHand, bjDealerHand;
+    let bjChips, bjBet, bjSplitBet, bjPhase, bjIsSplit, bjCurrentHand;
 
     function bjCardVal(hand) {
       let t=0,a=0;
@@ -313,62 +321,155 @@
       while(t>21&&a--) t-=10;
       return t;
     }
+    function bjActiveHand(){ return bjCurrentHand===0?bjPlayerHand:bjSplitHand; }
+    function bjActiveBet()  { return bjCurrentHand===0?bjBet:bjSplitBet; }
+    function bjSetActiveBet(v){ if(bjCurrentHand===0) bjBet=v; else bjSplitBet=v; }
+    function bjChipsAvail() { return bjChips-bjBet-(bjIsSplit?bjSplitBet:0); }
+    function bjRankVal(r)   { if(['J','Q','K'].includes(r))return 10; if(r==='A')return 11; return +r; }
+
     function bjRender(hideDealer=false) {
-      const ph=document.getElementById('player-hand'), dh=document.getElementById('dealer-hand');
-      ph.innerHTML=''; dh.innerHTML='';
+      const ph=document.getElementById('player-hand'), dh=document.getElementById('dealer-hand'), sh=document.getElementById('split-hand');
+      ph.innerHTML=''; dh.innerHTML=''; if(sh) sh.innerHTML='';
       bjPlayerHand.forEach(c=>ph.appendChild(makeCardEl(c)));
       bjDealerHand.forEach((c,i)=>dh.appendChild(makeCardEl(c,hideDealer&&i===1)));
       document.getElementById('bj-player-score').textContent=bjCardVal(bjPlayerHand);
       document.getElementById('bj-dealer-score').textContent=hideDealer?bjCardVal([bjDealerHand[0]]):bjCardVal(bjDealerHand);
+      if(bjIsSplit) {
+        if(sh) bjSplitHand.forEach(c=>sh.appendChild(makeCardEl(c)));
+        const sc=document.getElementById('bj-split-score');
+        if(sc) sc.textContent=bjSplitHand.length?bjCardVal(bjSplitHand):'';
+        const h1=document.getElementById('bj-hand1-area'), h2=document.getElementById('bj-hand2-area');
+        if(h1) h1.style.outline=bjCurrentHand===0?'2px solid #4f46e5':'none';
+        if(h2) h2.style.outline=bjCurrentHand===1?'2px solid #4f46e5':'none';
+      }
     }
     function bjStatus(msg,cls='') { const e=document.getElementById('bj-status'); e.textContent=msg; e.className='game-status '+cls; }
     function bjUpdateDisplay() {
       document.getElementById('bj-chips').textContent=bjChips;
-      document.getElementById('bj-bet-display').textContent=bjBet;
+      document.getElementById('bj-bet-display').textContent=bjIsSplit?`${bjBet}+${bjSplitBet}`:bjBet;
       document.getElementById('bj-deal-btn').disabled=bjBet===0;
+    }
+    function bjUpdateActionBtns() {
+      if(bjPhase!=='playing') return;
+      const hand=bjActiveHand(), bet=bjActiveBet(), is2=hand.length===2;
+      const dbl=document.getElementById('bj-double-btn'), spl=document.getElementById('bj-split-btn');
+      if(dbl) dbl.style.display=is2&&bjChipsAvail()>=bet?'':'none';
+      const canSpl=!bjIsSplit&&is2&&bjRankVal(bjPlayerHand[0].r)===bjRankVal(bjPlayerHand[1].r)&&bjChipsAvail()>=bjBet;
+      if(spl) spl.style.display=canSpl?'':'none';
     }
     function bjAddBet(n) { if(bjPhase!=='betting'||bjBet+n>bjChips) return; bjBet+=n; bjUpdateDisplay(); }
     function bjClearBet() { if(bjPhase!=='betting') return; bjBet=0; bjUpdateDisplay(); }
+
     function bjDeal() {
-      if(bjBet===0) return; bjPhase='playing';
+      if(bjBet===0) return;
+      bjPhase='playing'; bjIsSplit=false; bjCurrentHand=0; bjSplitBet=bjBet;
       bjDeck=buildShuffledDeck();
       bjPlayerHand=[bjDeck.pop(),bjDeck.pop()];
-      bjDealerHand=[bjDeck.pop(),bjDeck.pop()];
+      bjSplitHand=[]; bjDealerHand=[bjDeck.pop(),bjDeck.pop()];
       document.getElementById('bj-bet-section').style.display='none';
       document.getElementById('bj-action-section').style.display='block';
+      document.getElementById('bj-hand2-area').style.display='none';
+      document.getElementById('bj-hand1-area').style.outline='none';
       bjRender(true); bjStatus("Your turn");
-      if(bjCardVal(bjPlayerHand)===21) bjStand();
+      bjUpdateDisplay(); bjUpdateActionBtns();
+      if(bjCardVal(bjPlayerHand)===21) bjNextOrDealer();
     }
-    function bjHit() { bjPlayerHand.push(bjDeck.pop()); bjRender(true); if(bjCardVal(bjPlayerHand)>21) bjEndRound('bust'); }
-    function bjStand() {
-      bjPhase='dealer'; bjRender(false);
-      const go=()=>{ if(bjCardVal(bjDealerHand)<17){bjDealerHand.push(bjDeck.pop());bjRender(false);setTimeout(go,500);}else bjEndRound('compare'); };
-      setTimeout(go,400);
+
+    function bjHit() {
+      bjActiveHand().push(bjDeck.pop());
+      bjRender(true);
+      const v=bjCardVal(bjActiveHand());
+      if(v>21) {
+        if(bjIsSplit&&bjCurrentHand===0) bjStatus('Hand 1 busted!','lose');
+        bjNextOrDealer();
+      } else if(v===21) {
+        bjNextOrDealer();
+      } else {
+        bjUpdateActionBtns();
+      }
     }
-    function bjEndRound(reason) {
-      bjPhase='done'; bjRender(false);
-      const p=bjCardVal(bjPlayerHand), d=bjCardVal(bjDealerHand);
-      let msg,cls;
-      if(reason==='bust'){msg=`Bust! ${p} — You lose $${bjBet}.`;cls='lose';bjChips-=bjBet;}
-      else if(d>21){msg=`Dealer busts! You win $${bjBet}!`;cls='win';bjChips+=bjBet;}
-      else if(p>d){msg=`${p} vs ${d} — You win $${bjBet}!`;cls='win';bjChips+=bjBet;}
-      else if(d>p){msg=`${p} vs ${d} — Dealer wins.`;cls='lose';bjChips-=bjBet;}
-      else{msg=`${p} vs ${d} — Push!`;cls='push';}
-      bjStatus(msg,cls);
+
+    function bjDouble() {
+      const bet=bjActiveBet();
+      if(bjChipsAvail()<bet) return;
+      bjSetActiveBet(bet*2);
+      bjActiveHand().push(bjDeck.pop());
+      bjUpdateDisplay(); bjRender(true);
+      bjStatus(`Doubled → ${bjCardVal(bjActiveHand())}`);
+      bjNextOrDealer();
+    }
+
+    function bjSplitHands() {
+      if(bjIsSplit||bjPlayerHand.length!==2||bjChipsAvail()<bjBet) return;
+      bjIsSplit=true; bjCurrentHand=0; bjSplitBet=bjBet;
+      bjSplitHand=[bjPlayerHand.pop()];
+      bjPlayerHand.push(bjDeck.pop());
+      bjSplitHand.push(bjDeck.pop());
+      document.getElementById('bj-hand2-area').style.display='block';
+      bjRender(true); bjStatus("Hand 1 — play your hand");
+      bjUpdateDisplay(); bjUpdateActionBtns();
+    }
+
+    function bjStand() { bjNextOrDealer(); }
+
+    function bjNextOrDealer() {
+      if(bjIsSplit&&bjCurrentHand===0) {
+        bjCurrentHand=1;
+        bjRender(true); bjStatus("Hand 2 — play your hand");
+        bjUpdateActionBtns();
+      } else {
+        bjPhase='dealer';
+        document.getElementById('bj-action-section').style.display='none';
+        bjRender(false);
+        const go=()=>{
+          if(bjCardVal(bjDealerHand)<17){bjDealerHand.push(bjDeck.pop());bjRender(false);setTimeout(go,500);}
+          else bjResolveAll();
+        };
+        setTimeout(go,400);
+      }
+    }
+
+    function bjResolveHand(hand, bet) {
+      const p=bjCardVal(hand), d=bjCardVal(bjDealerHand);
+      if(p>21) return {net:-bet, msg:`Bust(${p})`};
+      if(d>21) return {net:bet,  msg:`Dealer busts +$${bet}`};
+      if(p>d)  return {net:bet,  msg:`${p}>${d} +$${bet}`};
+      if(d>p)  return {net:-bet, msg:`${p}<${d} -$${bet}`};
+      return    {net:0,  msg:`${p}=${d} Push`};
+    }
+
+    function bjResolveAll() {
+      bjPhase='done';
+      const r1=bjResolveHand(bjPlayerHand, bjBet);
+      bjChips+=r1.net;
+      let msg=r1.msg, totalNet=r1.net;
+      if(bjIsSplit) {
+        const r2=bjResolveHand(bjSplitHand, bjSplitBet);
+        bjChips+=r2.net; totalNet+=r2.net;
+        msg=`H1: ${r1.msg} | H2: ${r2.msg}`;
+      }
+      if(bjChips<=0){bjChips=500; msg+=' | Reset $500.';}
+      bjStatus(msg, totalNet>0?'win':totalNet<0?'lose':'push');
       document.getElementById('bj-action-section').style.display='none';
       document.getElementById('bj-new-btn').style.display='block';
-      if(bjChips<=0){bjChips=500; bjStatus('Out of chips! Reset to $500.','lose');}
       bjUpdateDisplay();
     }
+
     function bjNewRound() {
-      bjBet=0; bjPhase='betting';
+      bjBet=0; bjSplitBet=0; bjPhase='betting'; bjIsSplit=false; bjCurrentHand=0;
       document.getElementById('bj-new-btn').style.display='none';
       document.getElementById('bj-bet-section').style.display='block';
-      document.getElementById('player-hand').innerHTML=''; document.getElementById('dealer-hand').innerHTML='';
-      document.getElementById('bj-player-score').textContent=''; document.getElementById('bj-dealer-score').textContent='';
+      document.getElementById('bj-hand2-area').style.display='none';
+      document.getElementById('bj-hand1-area').style.outline='none';
+      document.getElementById('player-hand').innerHTML='';
+      document.getElementById('dealer-hand').innerHTML='';
+      document.getElementById('split-hand').innerHTML='';
+      document.getElementById('bj-player-score').textContent='';
+      document.getElementById('bj-dealer-score').textContent='';
+      document.getElementById('bj-split-score').textContent='';
       bjStatus('Place your bet!'); bjUpdateDisplay();
     }
-    bjChips=500; bjBet=0; bjPhase='betting'; bjUpdateDisplay();
+    bjChips=500; bjBet=0; bjSplitBet=0; bjPhase='betting'; bjIsSplit=false; bjCurrentHand=0; bjUpdateDisplay();
 
     /* ── Three Card Poker ── */
     const TCP_VAL={'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
