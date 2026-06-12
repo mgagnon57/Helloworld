@@ -9,11 +9,7 @@
   <meta name="theme-color" content="#4f46e5" />
   <title>Hello, Mike!</title>
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -21,75 +17,205 @@
       min-height: 100vh;
       min-height: 100dvh;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      flex-direction: column;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
-    .card {
-      background: #ffffff;
-      border-radius: 24px;
-      padding: 48px 36px;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-      max-width: 360px;
-      width: 90%;
-    }
-
-    .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    /* ── Tab bar ── */
+    .tabs {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      font-size: 36px;
+      background: rgba(0,0,0,0.25);
+      padding: 10px 16px 0;
+      gap: 4px;
     }
-
-    h1 {
-      font-size: clamp(1.75rem, 8vw, 2.25rem);
-      color: #1e1b4b;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 12px;
-    }
-
-    p {
-      color: #6b7280;
-      font-size: 1rem;
-      line-height: 1.6;
-      margin-bottom: 32px;
-    }
-
-    .btn {
-      display: inline-block;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: #ffffff;
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 14px 32px;
-      border-radius: 50px;
+    .tab-btn {
+      flex: 1;
+      padding: 10px 0;
       border: none;
+      border-radius: 10px 10px 0 0;
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      text-decoration: none;
-      transition: opacity 0.2s;
+      transition: background 0.2s, color 0.2s;
+    }
+    .tab-btn.active {
+      background: #fff;
+      color: #4f46e5;
     }
 
-    .btn:active {
-      opacity: 0.8;
+    /* ── Panels ── */
+    .panel { display: none; flex: 1; align-items: center; justify-content: center; padding: 24px 16px; }
+    .panel.active { display: flex; }
+
+    /* ── Hello card ── */
+    .card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 48px 36px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      max-width: 360px;
+      width: 100%;
     }
+    .avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 36px;
+    }
+    .card h1 {
+      font-size: clamp(1.75rem, 8vw, 2.25rem);
+      color: #1e1b4b; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px;
+    }
+    .card p { color: #6b7280; font-size: 1rem; line-height: 1.6; margin-bottom: 32px; }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff; font-size: 1rem; font-weight: 600;
+      padding: 14px 32px; border-radius: 50px; border: none;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation; transition: opacity 0.2s;
+    }
+    .btn:active { opacity: 0.8; }
+
+    /* ── Tic Tac Toe ── */
+    .ttt {
+      background: #fff;
+      border-radius: 24px;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      max-width: 360px;
+      width: 100%;
+    }
+    .ttt h2 { color: #1e1b4b; font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; }
+    .ttt-status {
+      color: #6b7280; font-size: 0.95rem; margin-bottom: 20px; min-height: 1.4em;
+    }
+    .ttt-status.win { color: #4f46e5; font-weight: 700; font-size: 1.05rem; }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .cell {
+      aspect-ratio: 1;
+      background: #f3f4f6;
+      border-radius: 12px;
+      border: none;
+      font-size: clamp(2rem, 10vw, 2.8rem);
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.15s, transform 0.1s;
+      color: #1e1b4b;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cell:active { transform: scale(0.93); }
+    .cell.x { color: #4f46e5; background: #ede9fe; }
+    .cell.o { color: #7c3aed; background: #f5f3ff; }
+    .cell.win-cell { background: #4f46e5; color: #fff; }
+    .cell:disabled { cursor: default; }
+
+    .ttt .btn { width: 100%; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="avatar">👋</div>
-    <h1>Hello, Mike!</h1>
-    <p>Welcome to your mobile-friendly web app, running on iOS and Samsung devices.</p>
-    <button class="btn" onclick="this.textContent='👍 Hey!'">Say Hey</button>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="showTab('hello', this)">👋 Hello</button>
+    <button class="tab-btn" onclick="showTab('ttt', this)">🎮 Tic Tac Toe</button>
+  </nav>
+
+  <!-- Hello panel -->
+  <div id="panel-hello" class="panel active">
+    <div class="card">
+      <div class="avatar">👋</div>
+      <h1>Hello, Mike!</h1>
+      <p>Welcome to your mobile-friendly web app, running on iOS and Samsung devices.</p>
+      <button class="btn" onclick="this.textContent='👍 Hey!'">Say Hey</button>
+    </div>
   </div>
+
+  <!-- Tic Tac Toe panel -->
+  <div id="panel-ttt" class="panel">
+    <div class="ttt">
+      <h2>Tic Tac Toe</h2>
+      <div class="ttt-status" id="ttt-status">X goes first</div>
+      <div class="board" id="board">
+        <button class="cell" onclick="move(0)"></button>
+        <button class="cell" onclick="move(1)"></button>
+        <button class="cell" onclick="move(2)"></button>
+        <button class="cell" onclick="move(3)"></button>
+        <button class="cell" onclick="move(4)"></button>
+        <button class="cell" onclick="move(5)"></button>
+        <button class="cell" onclick="move(6)"></button>
+        <button class="cell" onclick="move(7)"></button>
+        <button class="cell" onclick="move(8)"></button>
+      </div>
+      <button class="btn" onclick="resetGame()">New Game</button>
+    </div>
+  </div>
+
+  <script>
+    function showTab(name, btn) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('panel-' + name).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    let board, current, over;
+
+    function resetGame() {
+      board = Array(9).fill('');
+      current = 'X';
+      over = false;
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(c => {
+        c.textContent = '';
+        c.className = 'cell';
+        c.disabled = false;
+      });
+      document.getElementById('ttt-status').className = 'ttt-status';
+      document.getElementById('ttt-status').textContent = 'X goes first';
+    }
+
+    function move(i) {
+      if (over || board[i]) return;
+      board[i] = current;
+      const cell = document.querySelectorAll('.cell')[i];
+      cell.textContent = current;
+      cell.classList.add(current.toLowerCase());
+      cell.disabled = true;
+
+      const win = WINS.find(([a,b,c]) => board[a] && board[a] === board[b] && board[a] === board[c]);
+      if (win) {
+        over = true;
+        win.forEach(idx => document.querySelectorAll('.cell')[idx].classList.add('win-cell'));
+        const s = document.getElementById('ttt-status');
+        s.textContent = current + ' wins! 🎉';
+        s.className = 'ttt-status win';
+        document.querySelectorAll('.cell').forEach(c => c.disabled = true);
+      } else if (board.every(Boolean)) {
+        over = true;
+        document.getElementById('ttt-status').textContent = "It's a draw!";
+      } else {
+        current = current === 'X' ? 'O' : 'X';
+        document.getElementById('ttt-status').textContent = current + "'s turn";
+      }
+    }
+
+    resetGame();
+  </script>
 </body>
 </html>
