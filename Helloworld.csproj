@@ -8,9 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.*" />
-    <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="8.*" />
   </ItemGroup>
 
 </Project>
