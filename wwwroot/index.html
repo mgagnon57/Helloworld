@@ -251,28 +251,24 @@
       if (name === 'history') loadHistory();
     }
 
-    /* Results API */
+    /* Results — localStorage */
     function saveResult(game, result, net, detail) {
-      fetch('/api/results', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({game, result, net, detail})
-      }).catch(function(){});
+      var history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+      history.unshift({game: game, result: result, net: net, detail: detail});
+      if (history.length > 100) history.length = 100;
+      localStorage.setItem('gameHistory', JSON.stringify(history));
     }
 
     function loadHistory() {
-      fetch('/api/results').then(function(r){ return r.ok ? r.json() : null; }).then(function(rows) {
-        var list = document.getElementById('history-list');
-        if (!rows || rows.length === 0) { list.innerHTML = '<li class="history-empty">No results yet.</li>'; return; }
-        list.innerHTML = rows.map(function(r) {
-          var label = r.game === 'blackjack' ? 'BJ' : '3C';
-          var netCls = r.net > 0 ? 'win' : r.net < 0 ? 'lose' : 'push';
-          var netStr = r.net > 0 ? '+$' + r.net : r.net < 0 ? '-$' + Math.abs(r.net) : 'push';
-          return '<li><span class="h-game">'+label+'</span><span class="h-detail">'+r.detail+'</span><span class="h-net '+netCls+'">'+netStr+'</span></li>';
-        }).join('');
-      }).catch(function(){
-        document.getElementById('history-list').innerHTML = '<li class="history-empty">Not available.</li>';
-      });
+      var rows = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+      var list = document.getElementById('history-list');
+      if (rows.length === 0) { list.innerHTML = '<li class="history-empty">No results yet.</li>'; return; }
+      list.innerHTML = rows.map(function(r) {
+        var label = r.game === 'blackjack' ? 'BJ' : '3C';
+        var netCls = r.net > 0 ? 'win' : r.net < 0 ? 'lose' : 'push';
+        var netStr = r.net > 0 ? '+$' + r.net : r.net < 0 ? '-$' + Math.abs(r.net) : 'push';
+        return '<li><span class="h-game">'+label+'</span><span class="h-detail">'+r.detail+'</span><span class="h-net '+netCls+'">'+netStr+'</span></li>';
+      }).join('');
     }
 
     /* Shared */
