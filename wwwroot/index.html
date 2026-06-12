@@ -18,6 +18,47 @@
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
     }
+
+    /* ---- Login Screen ---- */
+    #login-screen {
+      position: fixed; inset: 0; z-index: 100;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+      padding-top: calc(24px + env(safe-area-inset-top));
+    }
+    .login-card {
+      background: #fff; border-radius: 24px; padding: 40px 28px 32px;
+      text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.28);
+      max-width: 340px; width: 100%;
+    }
+    .login-logo {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; font-size: 32px;
+    }
+    .login-card h1 { font-size: 1.7rem; color: #1e1b4b; font-weight: 700; margin-bottom: 6px; }
+    .login-card p  { color: #6b7280; font-size: 0.9rem; margin-bottom: 28px; }
+    .provider-btn {
+      display: flex; align-items: center; gap: 12px; width: 100%;
+      padding: 13px 18px; border-radius: 12px; border: 1.5px solid #e5e7eb;
+      background: #fff; color: #111827; font-size: 0.92rem; font-weight: 600;
+      cursor: pointer; margin-bottom: 10px; transition: background 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .provider-btn:last-child { margin-bottom: 0; }
+    .provider-btn:hover  { background: #f9fafb; border-color: #d1d5db; }
+    .provider-btn:active { background: #f3f4f6; }
+    .provider-btn.github { background: #24292e; color: #fff; border-color: #24292e; }
+    .provider-btn.github:hover  { background: #2f3439; border-color: #2f3439; }
+    .provider-btn.github:active { background: #1a1f24; }
+    .provider-btn svg { flex-shrink: 0; }
+    #no-providers-msg { color: #dc2626; font-size: 0.82rem; line-height: 1.5; padding: 8px 0; }
+
+    /* ---- Main App ---- */
+    #main-app { display: none; flex-direction: column; flex: 1; min-height: 100dvh; }
+
     .tabs { display: flex; background: rgba(0,0,0,0.25); padding: 10px 12px 0; gap: 3px; }
     .tab-btn {
       flex: 1; padding: 9px 0; border: none;
@@ -43,11 +84,17 @@
     .btn:disabled { opacity: 0.4; cursor: default; }
 
     /* Hello */
-    .card { background: #fff; border-radius: 24px; padding: 48px 36px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-width: 360px; width: 100%; }
-    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 36px; }
+    .card { background: #fff; border-radius: 24px; padding: 40px 36px 36px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-width: 360px; width: 100%; }
+    .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 36px; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .card h1 { font-size: clamp(1.75rem, 8vw, 2.25rem); color: #1e1b4b; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; }
-    .card p { color: #6b7280; font-size: 1rem; line-height: 1.6; margin-bottom: 32px; }
-
+    .card p { color: #6b7280; font-size: 1rem; line-height: 1.6; margin-bottom: 28px; }
+    .signout-btn {
+      display: block; width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid #e5e7eb;
+      background: #fff; color: #6b7280; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .signout-btn:hover { background: #f9fafb; }
 
     /* Shared card game styles */
     .game-box { background: #fff; border-radius: 24px; padding: 16px 16px 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-width: 390px; width: 100%; }
@@ -108,195 +155,299 @@
 </head>
 <body>
 
-  <nav class="tabs">
-    <button class="tab-btn active" onclick="showTab('hello', this)">&#x1F44B; Hello</button>
-    <button class="tab-btn" onclick="showTab('bj', this)">&#x1F0CF; BJ</button>
-    <button class="tab-btn" onclick="showTab('tcp', this)">&#x2660; 3-Card</button>
-    <button class="tab-btn" onclick="showTab('history', this)">&#x1F4CA; History</button>
-  </nav>
-
-  <!-- Hello -->
-  <div id="panel-hello" class="panel active" style="display:flex">
-    <div class="card">
-      <div class="avatar">&#x1F44B;</div>
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">&#x1F0CF;</div>
       <h1>Hello, Mike!</h1>
-      <p>Welcome to your mobile-friendly web app, running on iOS and Samsung devices.</p>
-      <button class="btn" onclick="this.textContent='&#x1F44D; Hey!'">Say Hey</button>
+      <p>Sign in to start playing</p>
+      <div id="provider-buttons"></div>
+      <p id="no-providers-msg" style="display:none">
+        No login providers are configured yet.<br>
+        Add credentials to <strong>appsettings.json</strong>.
+      </p>
     </div>
   </div>
 
+  <!-- Main App -->
+  <div id="main-app">
 
-  <!-- Blackjack -->
-  <div id="panel-bj" class="panel" style="display:none">
-    <div class="game-box">
-      <h2>Blackjack</h2>
-      <div class="chip-info">&#x1F4B0; Chips: <span id="bj-chips">500</span> &nbsp;|&nbsp; Bet: <span id="bj-bet-display">0</span></div>
-      <div class="hand-area">
-        <div class="hand-label">Dealer</div>
-        <div class="hand" id="dealer-hand"></div>
-        <div class="hand-name" id="bj-dealer-score"></div>
-      </div>
-      <hr class="divider"/>
-      <div class="hand-area" id="bj-hand1-area">
-        <div class="hand-label">You</div>
-        <div class="hand" id="player-hand"></div>
-        <div class="hand-name" id="bj-player-score"></div>
-      </div>
-      <div class="hand-area" id="bj-hand2-area" style="display:none">
-        <div class="hand-label" id="bj-hand2-label">Hand 2</div>
-        <div class="hand" id="split-hand"></div>
-        <div class="hand-name" id="bj-split-score"></div>
-      </div>
-      <div class="game-status" id="bj-status">Place your bet!</div>
-      <div id="bj-bet-section">
-        <div class="bet-row">
-          <button class="chip-btn chip-5"   onclick="bjAddBet(5)">$5</button>
-          <button class="chip-btn chip-10"  onclick="bjAddBet(10)">$10</button>
-          <button class="chip-btn chip-25"  onclick="bjAddBet(25)">$25</button>
-          <button class="chip-btn chip-100" onclick="bjAddBet(100)">$100</button>
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="showTab('hello', this)">&#x1F44B; Hello</button>
+      <button class="tab-btn" onclick="showTab('bj', this)">&#x1F0CF; BJ</button>
+      <button class="tab-btn" onclick="showTab('tcp', this)">&#x2660; 3-Card</button>
+      <button class="tab-btn" onclick="showTab('history', this)">&#x1F4CA; History</button>
+    </nav>
+
+    <!-- Hello -->
+    <div id="panel-hello" class="panel active" style="display:flex">
+      <div class="card">
+        <div class="avatar" id="user-avatar">
+          <span id="user-avatar-initial">&#x1F44B;</span>
         </div>
-        <div class="action-row">
-          <button class="btn" id="bj-deal-btn" onclick="bjDeal()" disabled>Deal</button>
-          <button class="btn" style="background:linear-gradient(135deg,#6b7280,#9ca3af)" onclick="bjClearBet()">Clear</button>
-        </div>
+        <h1>Hello, <span id="user-display-name">Mike</span>!</h1>
+        <p>Welcome to your mobile-friendly web app, running on iOS and Samsung devices.</p>
+        <button class="btn" onclick="this.textContent='&#x1F44D; Hey!'" style="width:100%;margin-bottom:12px">Say Hey</button>
+        <button class="signout-btn" onclick="logout()">Sign out</button>
       </div>
-      <div id="bj-action-section" style="display:none">
-        <div class="action-row" style="flex-wrap:wrap">
-          <button class="btn" onclick="bjHit()">Hit</button>
-          <button class="btn" onclick="bjStand()">Stand</button>
-          <button class="btn" id="bj-double-btn" onclick="bjDouble()" style="background:linear-gradient(135deg,#d97706,#f59e0b);display:none">Double</button>
-          <button class="btn" id="bj-split-btn" onclick="bjSplitHands()" style="background:linear-gradient(135deg,#16a34a,#22c55e);display:none">Split</button>
-        </div>
-      </div>
-      <button class="btn" id="bj-new-btn" onclick="bjNewRound()" style="display:none;width:100%;margin-top:8px">New Round</button>
     </div>
-  </div>
 
-  <!-- Three Card Poker -->
-  <div id="panel-tcp" class="panel" style="display:none">
-    <div class="game-box">
-      <h2>Three Card Poker</h2>
-      <div class="chip-info">&#x1F4B0; <span id="tcp-chips">500</span> &nbsp;|&nbsp; Ante: <span id="tcp-ante-disp">0</span> &nbsp;|&nbsp; P+: <span id="tcp-pp-disp">0</span></div>
-
-      <div class="hand-area">
-        <div class="hand-label">Dealer</div>
-        <div class="hand" id="tcp-dealer-hand"></div>
-        <div class="hand-name" id="tcp-dealer-name"></div>
-      </div>
-      <hr class="divider"/>
-      <div class="hand-area">
-        <div class="hand-label">You</div>
-        <div class="hand" id="tcp-player-hand"></div>
-        <div class="hand-name" id="tcp-player-name"></div>
-      </div>
-
-      <div class="game-status" id="tcp-status">Place your Ante to start!</div>
-
-      <div id="tcp-bet-section">
-        <div class="bet-label">Ante</div>
-        <div class="bet-row">
-          <button class="chip-btn chip-5"   onclick="tcpAddAnte(5)">$5</button>
-          <button class="chip-btn chip-10"  onclick="tcpAddAnte(10)">$10</button>
-          <button class="chip-btn chip-25"  onclick="tcpAddAnte(25)">$25</button>
-          <button class="chip-btn chip-100" onclick="tcpAddAnte(100)">$100</button>
+    <!-- Blackjack -->
+    <div id="panel-bj" class="panel" style="display:none">
+      <div class="game-box">
+        <h2>Blackjack</h2>
+        <div class="chip-info">&#x1F4B0; Chips: <span id="bj-chips">500</span> &nbsp;|&nbsp; Bet: <span id="bj-bet-display">0</span></div>
+        <div class="hand-area">
+          <div class="hand-label">Dealer</div>
+          <div class="hand" id="dealer-hand"></div>
+          <div class="hand-name" id="bj-dealer-score"></div>
         </div>
-        <div class="bet-label">Pair Plus <span style="font-weight:400;text-transform:none">(optional side bet)</span></div>
-        <div class="bet-row">
-          <button class="chip-btn chip-5"  onclick="tcpAddPP(5)">$5</button>
-          <button class="chip-btn chip-10" onclick="tcpAddPP(10)">$10</button>
-          <button class="chip-btn chip-25" onclick="tcpAddPP(25)">$25</button>
+        <hr class="divider"/>
+        <div class="hand-area" id="bj-hand1-area">
+          <div class="hand-label">You</div>
+          <div class="hand" id="player-hand"></div>
+          <div class="hand-name" id="bj-player-score"></div>
         </div>
-        <div class="action-row">
-          <button class="btn" id="tcp-deal-btn" onclick="tcpDeal()" disabled>Deal</button>
-          <button class="btn" style="background:linear-gradient(135deg,#6b7280,#9ca3af)" onclick="tcpClear()">Clear</button>
+        <div class="hand-area" id="bj-hand2-area" style="display:none">
+          <div class="hand-label" id="bj-hand2-label">Hand 2</div>
+          <div class="hand" id="split-hand"></div>
+          <div class="hand-name" id="bj-split-score"></div>
         </div>
-        <table class="payout-table" style="width:100%;margin-top:8px">
-          <tr><td colspan="3" style="font-weight:700;color:#4f46e5;padding-bottom:3px">Pair Plus &nbsp;&nbsp;&nbsp; Ante Bonus</td></tr>
-          <tr><td>Str. Flush</td><td>40:1</td><td>5:1</td></tr>
-          <tr><td>3 of a Kind</td><td>30:1</td><td>4:1</td></tr>
-          <tr><td>Straight</td><td>6:1</td><td>1:1</td></tr>
-          <tr><td>Flush</td><td>3:1</td><td>&mdash;</td></tr>
-          <tr><td>Pair</td><td>1:1</td><td>&mdash;</td></tr>
-        </table>
+        <div class="game-status" id="bj-status">Place your bet!</div>
+        <div id="bj-bet-section">
+          <div class="bet-row">
+            <button class="chip-btn chip-5"   onclick="bjAddBet(5)">$5</button>
+            <button class="chip-btn chip-10"  onclick="bjAddBet(10)">$10</button>
+            <button class="chip-btn chip-25"  onclick="bjAddBet(25)">$25</button>
+            <button class="chip-btn chip-100" onclick="bjAddBet(100)">$100</button>
+          </div>
+          <div class="action-row">
+            <button class="btn" id="bj-deal-btn" onclick="bjDeal()" disabled>Deal</button>
+            <button class="btn" style="background:linear-gradient(135deg,#6b7280,#9ca3af)" onclick="bjClearBet()">Clear</button>
+          </div>
+        </div>
+        <div id="bj-action-section" style="display:none">
+          <div class="action-row" style="flex-wrap:wrap">
+            <button class="btn" onclick="bjHit()">Hit</button>
+            <button class="btn" onclick="bjStand()">Stand</button>
+            <button class="btn" id="bj-double-btn" onclick="bjDouble()" style="background:linear-gradient(135deg,#d97706,#f59e0b);display:none">Double</button>
+            <button class="btn" id="bj-split-btn" onclick="bjSplitHands()" style="background:linear-gradient(135deg,#16a34a,#22c55e);display:none">Split</button>
+          </div>
+        </div>
+        <button class="btn" id="bj-new-btn" onclick="bjNewRound()" style="display:none;width:100%;margin-top:8px">New Round</button>
       </div>
-
-      <div id="tcp-action-section" style="display:none">
-        <div class="action-row">
-          <button class="btn" id="tcp-play-btn" onclick="tcpPlay()">Play</button>
-          <button class="btn" style="background:linear-gradient(135deg,#dc2626,#ef4444)" onclick="tcpFold()">Fold</button>
-        </div>
-      </div>
-
-      <button class="btn" id="tcp-new-btn" onclick="tcpNewRound()" style="display:none;width:100%;margin-top:8px">New Round</button>
     </div>
-  </div>
 
-  <!-- History -->
-  <div id="panel-history" class="panel" style="display:none">
-    <div class="history-box">
-      <h2>&#x1F4CA; History</h2>
-      <ul class="history-list" id="history-list">
-        <li class="history-empty">No results yet.</li>
-      </ul>
+    <!-- Three Card Poker -->
+    <div id="panel-tcp" class="panel" style="display:none">
+      <div class="game-box">
+        <h2>Three Card Poker</h2>
+        <div class="chip-info">&#x1F4B0; <span id="tcp-chips">500</span> &nbsp;|&nbsp; Ante: <span id="tcp-ante-disp">0</span> &nbsp;|&nbsp; P+: <span id="tcp-pp-disp">0</span></div>
+
+        <div class="hand-area">
+          <div class="hand-label">Dealer</div>
+          <div class="hand" id="tcp-dealer-hand"></div>
+          <div class="hand-name" id="tcp-dealer-name"></div>
+        </div>
+        <hr class="divider"/>
+        <div class="hand-area">
+          <div class="hand-label">You</div>
+          <div class="hand" id="tcp-player-hand"></div>
+          <div class="hand-name" id="tcp-player-name"></div>
+        </div>
+
+        <div class="game-status" id="tcp-status">Place your Ante to start!</div>
+
+        <div id="tcp-bet-section">
+          <div class="bet-label">Ante</div>
+          <div class="bet-row">
+            <button class="chip-btn chip-5"   onclick="tcpAddAnte(5)">$5</button>
+            <button class="chip-btn chip-10"  onclick="tcpAddAnte(10)">$10</button>
+            <button class="chip-btn chip-25"  onclick="tcpAddAnte(25)">$25</button>
+            <button class="chip-btn chip-100" onclick="tcpAddAnte(100)">$100</button>
+          </div>
+          <div class="bet-label">Pair Plus <span style="font-weight:400;text-transform:none">(optional side bet)</span></div>
+          <div class="bet-row">
+            <button class="chip-btn chip-5"  onclick="tcpAddPP(5)">$5</button>
+            <button class="chip-btn chip-10" onclick="tcpAddPP(10)">$10</button>
+            <button class="chip-btn chip-25" onclick="tcpAddPP(25)">$25</button>
+          </div>
+          <div class="action-row">
+            <button class="btn" id="tcp-deal-btn" onclick="tcpDeal()" disabled>Deal</button>
+            <button class="btn" style="background:linear-gradient(135deg,#6b7280,#9ca3af)" onclick="tcpClear()">Clear</button>
+          </div>
+          <table class="payout-table" style="width:100%;margin-top:8px">
+            <tr><td colspan="3" style="font-weight:700;color:#4f46e5;padding-bottom:3px">Pair Plus &nbsp;&nbsp;&nbsp; Ante Bonus</td></tr>
+            <tr><td>Str. Flush</td><td>40:1</td><td>5:1</td></tr>
+            <tr><td>3 of a Kind</td><td>30:1</td><td>4:1</td></tr>
+            <tr><td>Straight</td><td>6:1</td><td>1:1</td></tr>
+            <tr><td>Flush</td><td>3:1</td><td>&mdash;</td></tr>
+            <tr><td>Pair</td><td>1:1</td><td>&mdash;</td></tr>
+          </table>
+        </div>
+
+        <div id="tcp-action-section" style="display:none">
+          <div class="action-row">
+            <button class="btn" id="tcp-play-btn" onclick="tcpPlay()">Play</button>
+            <button class="btn" style="background:linear-gradient(135deg,#dc2626,#ef4444)" onclick="tcpFold()">Fold</button>
+          </div>
+        </div>
+
+        <button class="btn" id="tcp-new-btn" onclick="tcpNewRound()" style="display:none;width:100%;margin-top:8px">New Round</button>
+      </div>
     </div>
-  </div>
+
+    <!-- History -->
+    <div id="panel-history" class="panel" style="display:none">
+      <div class="history-box">
+        <h2>&#x1F4CA; History</h2>
+        <ul class="history-list" id="history-list">
+          <li class="history-empty">No results yet.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- #main-app -->
 
   <script>
-    /* Tab switching */
+    /* ===== Auth ===== */
+    async function initAuth() {
+      try {
+        var res = await fetch('/api/me');
+        var user = await res.json();
+        if (user.authenticated) {
+          updateUserDisplay(user);
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('main-app').style.display = 'flex';
+        } else {
+          await renderProviders();
+          document.getElementById('login-screen').style.display = 'flex';
+        }
+      } catch(e) {
+        await renderProviders();
+        document.getElementById('login-screen').style.display = 'flex';
+      }
+    }
+
+    async function renderProviders() {
+      var container = document.getElementById('provider-buttons');
+      try {
+        var providers = await fetch('/api/auth/providers').then(r => r.json());
+        if (!providers.length) {
+          document.getElementById('no-providers-msg').style.display = 'block';
+          return;
+        }
+        var html = '';
+        if (providers.includes('google')) {
+          html += '<button class="provider-btn" onclick="loginWith(\'google\')">'
+            + '<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">'
+            + '<path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>'
+            + '<path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>'
+            + '<path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>'
+            + '<path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>'
+            + '</svg>Continue with Google</button>';
+        }
+        if (providers.includes('microsoft')) {
+          html += '<button class="provider-btn" onclick="loginWith(\'microsoft\')">'
+            + '<svg width="18" height="18" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">'
+            + '<rect x="1" y="1" width="9" height="9" fill="#f25022"/>'
+            + '<rect x="11" y="1" width="9" height="9" fill="#7fba00"/>'
+            + '<rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>'
+            + '<rect x="11" y="11" width="9" height="9" fill="#ffb900"/>'
+            + '</svg>Continue with Microsoft</button>';
+        }
+        if (providers.includes('github')) {
+          html += '<button class="provider-btn github" onclick="loginWith(\'github\')">'
+            + '<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="white">'
+            + '<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>'
+            + '</svg>Continue with GitHub</button>';
+        }
+        container.innerHTML = html;
+      } catch(e) {
+        document.getElementById('no-providers-msg').style.display = 'block';
+      }
+    }
+
+    function loginWith(provider) { window.location.href = '/auth/login/' + provider; }
+
+    async function logout() {
+      await fetch('/auth/logout', { method: 'POST' });
+      window.location.reload();
+    }
+
+    function updateUserDisplay(user) {
+      var firstName = (user.name || 'Mike').split(' ')[0];
+      document.getElementById('user-display-name').textContent = firstName;
+      var avatarEl = document.getElementById('user-avatar');
+      if (user.avatar) {
+        avatarEl.innerHTML = '<img src="' + user.avatar + '" alt="' + firstName + '">';
+      } else {
+        document.getElementById('user-avatar-initial').textContent = firstName[0].toUpperCase();
+      }
+    }
+
+    /* ===== Tab switching ===== */
     function showTab(name, btn) {
       document.querySelectorAll('.panel').forEach(p => { p.classList.remove('active'); p.style.display='none'; });
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      const panel = document.getElementById('panel-' + name);
+      var panel = document.getElementById('panel-' + name);
       panel.classList.add('active'); panel.style.display='flex'; btn.classList.add('active');
       if (name === 'history') loadHistory();
     }
 
-    /* Results — localStorage */
-    function saveResult(game, result, net, detail) {
-      var history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
-      history.unshift({game: game, result: result, net: net, detail: detail});
-      if (history.length > 100) history.length = 100;
-      localStorage.setItem('gameHistory', JSON.stringify(history));
+    /* ===== Results — backend API ===== */
+    async function saveResult(game, result, net, detail) {
+      try {
+        await fetch('/api/results', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ game: game, result: result, net: net, detail: detail })
+        });
+      } catch(e) { /* ignore */ }
     }
 
-    function loadHistory() {
-      var rows = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+    async function loadHistory() {
       var list = document.getElementById('history-list');
-      if (rows.length === 0) { list.innerHTML = '<li class="history-empty">No results yet.</li>'; return; }
-      list.innerHTML = rows.map(function(r) {
-        var label = r.game === 'blackjack' ? 'BJ' : '3C';
-        var netCls = r.net > 0 ? 'win' : r.net < 0 ? 'lose' : 'push';
-        var netStr = r.net > 0 ? '+$' + r.net : r.net < 0 ? '-$' + Math.abs(r.net) : 'push';
-        return '<li><span class="h-game">'+label+'</span><span class="h-detail">'+r.detail+'</span><span class="h-net '+netCls+'">'+netStr+'</span></li>';
-      }).join('');
+      list.innerHTML = '<li class="history-empty">Loading…</li>';
+      try {
+        var rows = await fetch('/api/results').then(r => r.json());
+        if (!rows.length) { list.innerHTML = '<li class="history-empty">No results yet.</li>'; return; }
+        list.innerHTML = rows.map(function(r) {
+          var label  = r.game === 'blackjack' ? 'BJ' : '3C';
+          var netCls = r.net > 0 ? 'win' : r.net < 0 ? 'lose' : 'push';
+          var netStr = r.net > 0 ? '+$' + r.net : r.net < 0 ? '-$' + Math.abs(r.net) : 'push';
+          return '<li><span class="h-game">'+label+'</span><span class="h-detail">'+r.detail+'</span><span class="h-net '+netCls+'">'+netStr+'</span></li>';
+        }).join('');
+      } catch(e) {
+        list.innerHTML = '<li class="history-empty">Failed to load history.</li>';
+      }
     }
 
-    /* Shared */
+    /* ===== Shared card helpers ===== */
     const SUITS=['♠','♥','♦','♣'];
     const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 
     function buildShuffledDeck() {
-      const d=[];
-      for (const s of SUITS) for (const r of RANKS) d.push({r,s});
-      for (let i=d.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[d[i],d[j]]=[d[j],d[i]];}
+      var d=[];
+      for (var s of SUITS) for (var r of RANKS) d.push({r,s});
+      for (var i=d.length-1;i>0;i--){var j=Math.random()*(i+1)|0;[d[i],d[j]]=[d[j],d[i]];}
       return d;
     }
 
     function makeCardEl(c, faceDown=false) {
-      const el=document.createElement('div');
+      var el=document.createElement('div');
       if (faceDown){el.className='playing-card face-down';el.textContent='🂠';return el;}
-      const red=c.s==='♥'||c.s==='♦';
+      var red=c.s==='♥'||c.s==='♦';
       el.className='playing-card '+(red?'red':'black');
       el.innerHTML='<span class="rank">'+c.r+'</span><span class="suit">'+c.s+'</span>';
       return el;
     }
 
-    /* Flip a face-down card element to face-up using scaleX transition */
     function flipCardEl(el, card) {
       el.style.transition='transform 0.17s ease-in';
       el.style.transform='scaleX(0)';
       setTimeout(function(){
-        const red=card.s==='♥'||card.s==='♦';
+        var red=card.s==='♥'||card.s==='♦';
         el.className='playing-card '+(red?'red':'black');
         el.innerHTML='<span class="rank">'+card.r+'</span><span class="suit">'+card.s+'</span>';
         el.removeAttribute('data-hole');
@@ -304,7 +455,6 @@
         el.style.transform='scaleX(1)';
       }, 175);
     }
-
 
     /* ===== Blackjack ===== */
     var bjDeck, bjPlayerHand, bjSplitHand, bjDealerHand;
@@ -662,6 +812,9 @@
       tcpStatus('Place your Ante to start!'); tcpUpdateDisplay();
     }
     tcpChips=500;tcpAnte=0;tcpPairPlus=0;tcpLastAnte=0;tcpLastPairPlus=0;tcpPhase='betting';tcpUpdateDisplay();
+
+    /* ===== Boot ===== */
+    window.addEventListener('DOMContentLoaded', initAuth);
   </script>
 </body>
 </html>
