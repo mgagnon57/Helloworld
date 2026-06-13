@@ -747,6 +747,19 @@
       while(t>21&&a--) t-=10;
       return t;
     }
+    function bjIsNatural(hand) { return hand.length===2 && bjCardVal(hand)===21; }
+    function bjIsSoft(hand) {
+      var t=0,aces=0;
+      for(var i=0;i<hand.length;i++){
+        var r=hand[i].r;
+        if(r==='A'){t+=11;aces++;}
+        else if(r==='J'||r==='Q'||r==='K') t+=10;
+        else t+=parseInt(r,10);
+      }
+      var soft=aces;
+      while(t>21&&soft--) t-=10;
+      return soft>0; // at least one Ace still counted as 11
+    }
     function bjActiveHand(){ return bjCurrentHand===0?bjPlayerHand:bjSplitHand; }
     function bjActiveBet()  { return bjCurrentHand===0?bjBet:bjSplitBet; }
     function bjSetActiveBet(v){ if(bjCurrentHand===0)bjBet=v; else bjSplitBet=v; }
@@ -807,9 +820,31 @@
         hole.setAttribute('data-hole','true');
         dh.appendChild(hole);
         document.getElementById('bj-dealer-score').textContent=bjCardVal([bjDealerHand[0]]);
-        document.getElementById('bj-action-section').style.display='block';
-        bjStatus('Your turn'); bjUpdateDisplay(); bjUpdateActionBtns();
-        if(bjCardVal(bjPlayerHand)===21) bjNextOrDealer();
+        var pNat=bjIsNatural(bjPlayerHand), dNat=bjIsNatural(bjDealerHand);
+        if(pNat||dNat){
+          // flip hole card immediately for natural BJ resolution
+          var holeEl=document.querySelector('.playing-card[data-hole]');
+          if(holeEl) flipCardEl(holeEl, bjDealerHand[1]);
+          document.getElementById('bj-dealer-score').textContent=bjCardVal(bjDealerHand);
+          bjPhase='done'; bjLastBet=bjBet;
+          var msg, net;
+          if(pNat&&dNat){
+            net=0; msg='Both Blackjack — Push';
+          } else if(pNat){
+            net=Math.floor(bjBet*1.5); msg='Blackjack! +$'+net+' (3:2)';
+          } else {
+            net=-bjBet; msg='Dealer Blackjack — -$'+bjBet;
+          }
+          bjChips+=net;
+          if(bjChips<=0){bjChips=500;msg+=' | Reset $500.';}
+          bjStatus(msg, net>0?'win':net<0?'lose':'push');
+          saveResult('blackjack', net>0?'win':net<0?'lose':'push', net, msg);
+          document.getElementById('bj-new-btn').style.display='block';
+          bjUpdateDisplay();
+        } else {
+          document.getElementById('bj-action-section').style.display='block';
+          bjStatus('Your turn'); bjUpdateDisplay(); bjUpdateActionBtns();
+        }
       }, 690);
     }
 
@@ -879,7 +914,8 @@
     }
 
     function bjDealerLoop() {
-      if(bjCardVal(bjDealerHand)<17){
+      var v=bjCardVal(bjDealerHand);
+      if(v<17||(v===17&&bjIsSoft(bjDealerHand))){
         var card=bjDeck.pop();
         bjDealerHand.push(card);
         document.getElementById('dealer-hand').appendChild(makeCardEl(card));
