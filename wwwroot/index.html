@@ -104,6 +104,17 @@
     .h-net.lose { color: #dc2626; }
     .h-net.push { color: #d97706; }
     .history-empty { text-align: center; color: #9ca3af; font-size: 0.9rem; padding: 24px 0; }
+
+    /* Video Poker */
+    .vp-hand { display: flex; justify-content: center; gap: 6px; margin: 10px 0 6px; }
+    .vp-card-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .vp-card-wrap .playing-card { width: 52px; height: 76px; }
+    .vp-card-wrap.held .playing-card { transform: translateY(-10px); border-color: #4f46e5; border-width: 2.5px; box-shadow: 0 6px 18px rgba(79,70,229,0.35); }
+    .hold-label { font-size: 0.65rem; font-weight: 800; color: #4f46e5; min-height: 1em; letter-spacing: 0.05em; }
+    .vp-pay-table { width: 100%; font-size: 0.7rem; color: #6b7280; margin-bottom: 10px; border-collapse: collapse; }
+    .vp-pay-table td { padding: 2px 6px; }
+    .vp-pay-table td:last-child { text-align: right; font-weight: 700; color: #374151; }
+    .vp-pay-table tr.winner td { color: #4f46e5; font-weight: 800; background: #ede9fe; }
   </style>
 </head>
 <body>
@@ -113,6 +124,7 @@
     <button class="tab-btn" onclick="showTab('bj', this)">&#x1F0CF; BJ</button>
     <button class="tab-btn" onclick="showTab('tcp', this)">&#x2660; 3-Card</button>
     <button class="tab-btn" onclick="showTab('history', this)">&#x1F4CA; History</button>
+    <button class="tab-btn" onclick="showTab('vp', this)">&#x1F3B0; VP</button>
   </nav>
 
   <!-- Hello -->
@@ -238,6 +250,43 @@
       <ul class="history-list" id="history-list">
         <li class="history-empty">No results yet.</li>
       </ul>
+    </div>
+  </div>
+
+  <!-- Video Poker -->
+  <div id="panel-vp" class="panel" style="display:none">
+    <div class="game-box">
+      <h2>Video Poker</h2>
+      <div class="chip-info">&#x1F4B0; Chips: <span id="vp-chips">500</span> &nbsp;|&nbsp; Bet: <span id="vp-bet-disp">0</span></div>
+      <div class="vp-hand" id="vp-hand"></div>
+      <div class="game-status" id="vp-status">Place your bet!</div>
+      <table class="vp-pay-table" id="vp-pay-table">
+        <tr data-hand="Royal Flush"><td>Royal Flush</td><td>250&times;</td></tr>
+        <tr data-hand="Straight Flush"><td>Straight Flush</td><td>50&times;</td></tr>
+        <tr data-hand="Four of a Kind"><td>Four of a Kind</td><td>25&times;</td></tr>
+        <tr data-hand="Full House"><td>Full House</td><td>9&times;</td></tr>
+        <tr data-hand="Flush"><td>Flush</td><td>6&times;</td></tr>
+        <tr data-hand="Straight"><td>Straight</td><td>4&times;</td></tr>
+        <tr data-hand="Three of a Kind"><td>Three of a Kind</td><td>3&times;</td></tr>
+        <tr data-hand="Two Pair"><td>Two Pair</td><td>2&times;</td></tr>
+        <tr data-hand="Jacks or Better"><td>Jacks or Better</td><td>1&times; (even)</td></tr>
+      </table>
+      <div id="vp-bet-section">
+        <div class="bet-row">
+          <button class="chip-btn chip-5"   onclick="vpAddBet(5)">$5</button>
+          <button class="chip-btn chip-10"  onclick="vpAddBet(10)">$10</button>
+          <button class="chip-btn chip-25"  onclick="vpAddBet(25)">$25</button>
+          <button class="chip-btn chip-100" onclick="vpAddBet(100)">$100</button>
+        </div>
+        <div class="action-row">
+          <button class="btn" id="vp-deal-btn" onclick="vpDeal()" disabled>Deal</button>
+          <button class="btn" style="background:linear-gradient(135deg,#6b7280,#9ca3af)" onclick="vpClearBet()">Clear</button>
+        </div>
+      </div>
+      <div id="vp-draw-section" style="display:none">
+        <button class="btn" onclick="vpDraw()" style="width:100%">Draw</button>
+      </div>
+      <button class="btn" id="vp-new-btn" onclick="vpNewHand()" style="display:none;width:100%;margin-top:8px">New Hand</button>
     </div>
   </div>
 
@@ -662,6 +711,125 @@
       tcpStatus('Place your Ante to start!'); tcpUpdateDisplay();
     }
     tcpChips=500;tcpAnte=0;tcpPairPlus=0;tcpLastAnte=0;tcpLastPairPlus=0;tcpPhase='betting';tcpUpdateDisplay();
+
+    /* ===== Video Poker (Jacks or Better) ===== */
+    var VP_RANK_VAL={'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
+    var VP_PAYS={'Royal Flush':250,'Straight Flush':50,'Four of a Kind':25,'Full House':9,'Flush':6,'Straight':4,'Three of a Kind':3,'Two Pair':2,'Jacks or Better':1,'High Card':0};
+    var vpDeck,vpHand,vpHeld,vpChips,vpBet,vpPhase,vpLastBet;
+
+    function vpEvalHand(hand) {
+      var vals=hand.map(function(c){return VP_RANK_VAL[c.r];}).sort(function(a,b){return a-b;});
+      var suits=hand.map(function(c){return c.s;});
+      var isFlush=suits.every(function(s){return s===suits[0];});
+      var counts={};
+      vals.forEach(function(v){counts[v]=(counts[v]||0)+1;});
+      var groups=Object.values(counts).sort(function(a,b){return b-a;});
+      var isWheel=vals[0]===2&&vals[1]===3&&vals[2]===4&&vals[3]===5&&vals[4]===14;
+      var isStraight=isWheel||(vals[4]-vals[0]===4&&Object.keys(counts).length===5);
+      if(isFlush&&isStraight&&!isWheel&&vals[0]===10) return 'Royal Flush';
+      if(isFlush&&isStraight) return 'Straight Flush';
+      if(groups[0]===4) return 'Four of a Kind';
+      if(groups[0]===3&&groups[1]===2) return 'Full House';
+      if(isFlush) return 'Flush';
+      if(isStraight) return 'Straight';
+      if(groups[0]===3) return 'Three of a Kind';
+      if(groups[0]===2&&groups[1]===2) return 'Two Pair';
+      if(groups[0]===2){
+        var pairVal=+Object.keys(counts).find(function(k){return counts[k]===2;});
+        if(pairVal>=11) return 'Jacks or Better';
+      }
+      return 'High Card';
+    }
+
+    function vpStatus(msg,cls){var e=document.getElementById('vp-status');e.textContent=msg;e.className='game-status '+(cls||'');}
+    function vpUpdateDisplay(){
+      document.getElementById('vp-chips').textContent=vpChips;
+      document.getElementById('vp-bet-disp').textContent=vpBet;
+      document.getElementById('vp-deal-btn').disabled=vpBet===0;
+    }
+    function vpAddBet(n){if(vpPhase!=='betting'||vpBet+n>vpChips)return;vpBet+=n;vpUpdateDisplay();}
+    function vpClearBet(){if(vpPhase!=='betting')return;vpBet=0;vpUpdateDisplay();}
+
+    function vpRenderHand(interactive) {
+      var container=document.getElementById('vp-hand');
+      container.innerHTML='';
+      for(var i=0;i<5;i++){
+        var wrap=document.createElement('div');
+        wrap.className='vp-card-wrap';
+        if(interactive)(function(idx){wrap.onclick=function(){vpToggleHold(idx);};})(i);
+        wrap.appendChild(makeCardEl(vpHand[i]));
+        var lbl=document.createElement('div');
+        lbl.className='hold-label';lbl.id='vp-hold-'+i;
+        wrap.appendChild(lbl);
+        container.appendChild(wrap);
+      }
+    }
+
+    function vpToggleHold(idx){
+      if(vpPhase!=='hold') return;
+      vpHeld[idx]=!vpHeld[idx];
+      var wraps=document.querySelectorAll('.vp-card-wrap');
+      wraps[idx].classList.toggle('held',vpHeld[idx]);
+      document.getElementById('vp-hold-'+idx).textContent=vpHeld[idx]?'HOLD':'';
+    }
+
+    function vpDeal(){
+      if(vpBet===0||vpBet>vpChips) return;
+      vpPhase='hold';
+      vpDeck=buildShuffledDeck();
+      vpHand=[vpDeck.pop(),vpDeck.pop(),vpDeck.pop(),vpDeck.pop(),vpDeck.pop()];
+      vpHeld=[false,false,false,false,false];
+      document.querySelectorAll('#vp-pay-table tr').forEach(function(r){r.classList.remove('winner');});
+      vpRenderHand(true);
+      vpStatus('Tap cards to HOLD, then Draw');
+      document.getElementById('vp-bet-section').style.display='none';
+      document.getElementById('vp-draw-section').style.display='block';
+      document.getElementById('vp-new-btn').style.display='none';
+    }
+
+    function vpDraw(){
+      if(vpPhase!=='hold') return;
+      vpPhase='result';
+      for(var i=0;i<5;i++){if(!vpHeld[i]) vpHand[i]=vpDeck.pop();}
+      var wraps=document.querySelectorAll('.vp-card-wrap');
+      for(var i=0;i<5;i++){
+        if(!vpHeld[i]){
+          var wrap=wraps[i];
+          wrap.removeChild(wrap.querySelector('.playing-card'));
+          wrap.insertBefore(makeCardEl(vpHand[i]),wrap.firstChild);
+        }
+        wraps[i].onclick=null; wraps[i].style.cursor='default';
+        document.getElementById('vp-hold-'+i).textContent='';
+        wraps[i].classList.remove('held');
+      }
+      var handName=vpEvalHand(vpHand);
+      var mult=VP_PAYS[handName]!==undefined?VP_PAYS[handName]:0;
+      var net=(mult-1)*vpBet;
+      vpLastBet=vpBet;
+      vpChips+=net;
+      if(vpChips<=0){vpChips=500;}
+      var row=document.querySelector('#vp-pay-table tr[data-hand="'+handName+'"]');
+      if(row) row.classList.add('winner');
+      var cls=net>0?'win':net<0?'lose':'push';
+      var msg=handName+(net>0?' +$'+net:net<0?' -$'+Math.abs(net):'');
+      vpStatus(msg,cls);
+      saveResult('video_poker',cls,net,handName);
+      document.getElementById('vp-draw-section').style.display='none';
+      document.getElementById('vp-new-btn').style.display='block';
+      vpUpdateDisplay();
+    }
+
+    function vpNewHand(){
+      vpBet=vpLastBet>0?Math.min(vpLastBet,vpChips):0;
+      vpPhase='betting';
+      document.getElementById('vp-hand').innerHTML='';
+      document.getElementById('vp-new-btn').style.display='none';
+      document.getElementById('vp-bet-section').style.display='block';
+      document.getElementById('vp-draw-section').style.display='none';
+      document.querySelectorAll('#vp-pay-table tr').forEach(function(r){r.classList.remove('winner');});
+      vpStatus('Place your bet!'); vpUpdateDisplay();
+    }
+    vpChips=500;vpBet=0;vpLastBet=0;vpPhase='betting';vpUpdateDisplay();
   </script>
 </body>
 </html>
